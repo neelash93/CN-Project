@@ -10,8 +10,8 @@ class PeerProcess{
 	private HashMap<String,Thread>requestPool=new HashMap<>();
 
 	Server server;
-	PeerProcess(String port,String ipAddress,String peerName){
-		server=new Server(port,ipAddress,peerName);
+	PeerProcess(String ipAddress,String port,String peerName){
+		server=new Server(ipAddress,port,peerName);
 	}
 	
 	public void createServer(){
@@ -35,7 +35,8 @@ public class Starter {
 
 	public static void main(String args[]) throws IOException{
 		int  sPort=8000;
-		PeerProcess peerProcess=new PeerProcess("localhost","My server","8010");
+		PeerProcess peerProcess=new PeerProcess("localhost","8010","My server");
+		peerProcess.createServer();
 		peerProcess.createRequest("192.168.0.30", 8010);
 	
 
