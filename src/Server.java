@@ -9,8 +9,8 @@ class Server implements Runnable {
 	private HashMap<String,Thread> connectionPool=new HashMap<>();
 	
 		
-		public Server(String port, String ipAddress, String peerName) {
-			// TODO Auto-generated constructor stub
+		public Server(String ipAdress,String port ,String peerName) {
+			// TODO Auto-generated constructor stub,
 			this.port=port;
 			this.ipAddress=ipAddress;
 			this.peerName=peerName;
