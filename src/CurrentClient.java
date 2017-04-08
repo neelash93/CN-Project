@@ -9,6 +9,5 @@ public class CurrentClient {
 		this.allPeers = peers;
 		prop = allPeers.get(index).prop;
 		comm = new Communication(prop);
-		
 	}
 }
