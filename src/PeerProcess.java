@@ -1,7 +1,4 @@
-import java.net.*;
 import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
 import java.util.*;
 
 class PeerProcess{
@@ -14,21 +11,21 @@ class PeerProcess{
 //		peerId = Integer.parseInt(args[1]);
 		
 		Property prop = parseCommonCfg();
-		ArrayList<AllPeers> peers = parsePeerInfo(prop);
+		ArrayList<Peer> peers = parsePeerInfo(prop);
 		
 		CurrentClient c = new CurrentClient(index, peers);
 		
 	}
 	
-	private static ArrayList<AllPeers> parsePeerInfo(Property prop){
-		ArrayList<AllPeers> peer = new ArrayList<>();
+	private static ArrayList<Peer> parsePeerInfo(Property prop){
+		ArrayList<Peer> peer = new ArrayList<>();
 		int i = 0;
 		try {
 			BufferedReader cfg = new BufferedReader(new FileReader(cfgFile));
 			String line = cfg.readLine();
 			while(line != null){
 				String items[] = line.split("\\s+");
-				AllPeers p = new AllPeers(items[0],items[1],items[2],items[3], prop);
+				Peer p = new Peer(items[0],items[1],items[2],items[3], prop);
 				if(Integer.parseInt(p.get_peerId()) == peerId)
 					index = i;
 				i++;
@@ -68,19 +65,10 @@ class PeerProcess{
 
 	Server server;
 	PeerProcess(String ipAddress,String port,String peerName){
-		server=new Server(ipAddress,port,peerName);
+
+
 	}
 	
-	public void createServer(){
-		Thread serverThread=new Thread(server);
-		serverThread.start();
-	}
-	
-	public void createRequest(String peerIp,int peerPort)throws IOException{
-		Client client = new Client(peerIp,peerPort);
-		Thread request=new Thread(client);
-		request.start();
-		requestPool.put(peerIp, request);
-	}
+
 }
 

@@ -1,53 +1,30 @@
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.HashMap;
+/* To compile, run the following command:
+ * javac Client.java Message.java Neighbor.java ServerListener.java PeerProcess.java
+ */
 
-class Server implements Runnable {
-	private String port;
-	private String ipAddress;
-	private String peerName;
-	private HashMap<String,Thread> connectionPool=new HashMap<>();
-	
-		
-		public Server(String ipAdress,String port ,String peerName) {
-			// TODO Auto-generated constructor stub,
-			this.port=port;
-			this.ipAddress=ipAddress;
-			this.peerName=peerName;
-			
-		}
+import java.net.*;
+import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
+import java.nio.charset.Charset;
+import java.util.*;
 
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			
-			try {
-				createServerRequestHandler();
-			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		}
-		
-		public void createServerRequestHandler() throws NumberFormatException, IOException{
-			ServerSocket listener = new ServerSocket(Integer.parseInt(port));
-			
-			try {
-				while(true) {
-					Thread requestHandlerThread=new Thread(new ServerRequestHandler(listener.accept(),peerName));
-					requestHandlerThread.start();
-					connectionPool.put(ipAddress, requestHandlerThread);
-					System.out.println("Client "  + ipAddress + " is connected!");
-				}
-			} finally {
-				listener.close();
-			}
-			
-		}
-	 
-	
+public class Server {
+
+	public  List<Message> messagesFromPeers;
+
+	private int peerId;
+	private String hostName;
+	private int portNumber; //The listener will be listening on this port number
+
+
+
+
+	public Server(int peerId, String hostName, int portNumber) {
+		this.peerId = peerId;
+		this.hostName = hostName;
+		this.portNumber = portNumber;
+		messagesFromPeers = new ArrayList<Message>();
+		new Thread(new ServerListener(portNumber,messagesFromPeers)).start();
+	}
 }

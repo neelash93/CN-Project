@@ -3,7 +3,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class AllPeers {
+public class Peer {
 	private String peerId;
 	private String hostName;
 	private String port;
@@ -14,7 +14,7 @@ public class AllPeers {
     public ObjectInputStream in;
 	public byte[] bitmap;
 	
-	AllPeers(String peerId, String host, String port, String hasFile, Property prop){
+	Peer(String peerId, String host, String port, String hasFile, Property prop){
 		this.peerId = peerId;
 		this.hostName = host;
 		this.port = port;

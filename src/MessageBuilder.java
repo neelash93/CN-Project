@@ -22,9 +22,9 @@ enum MessageType {
 class Message {
     private int length;
     private MessageType type;
-    private byte[] messagelength;
+    private byte[] messageLength;
     private byte[] payload;
-
+    private int clientId;
     public int getLength() {
         return length;
     }
@@ -33,17 +33,23 @@ class Message {
         return type;
     }
 
-    public byte[] getMessagelength() {
-        return messagelength;
+    public byte[] getMessageLength() {
+        return messageLength;
     }
 
     public byte[] getPayload() {
         return payload;
     }
 
+    public Message(int length,  MessageType mType, byte[] payload, int clientId) {
+        this(length,  payload, mType);
+        this.clientId = clientId;
+    }
+
+
     public Message(int length, byte[] payload, MessageType mtype) {
         this.length = length;
-        this.messagelength = ByteBuffer.allocate(4).putInt(length).array();
+        this.messageLength = ByteBuffer.allocate(4).putInt(length).array();
         this.type = mtype;
 
         if (hasPayload((mtype))) {
@@ -63,7 +69,7 @@ class Message {
     public byte[] getMessageBytes() {
         ByteBuffer messageBuffer = ByteBuffer.allocate(5 + length);
 
-        messageBuffer.put(messagelength);
+        messageBuffer.put(messageLength);
         messageBuffer.putInt(type.getValue());
 
         if (payload != null) {
