@@ -4,49 +4,51 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class Peer {
-	private String peerId;
-	private String hostName;
-	private String port;
-	public boolean hasFile;
+	
 	public Property prop;
+	
+	
+	
 	public Socket requestSocket;           
     public ObjectOutputStream out;  
     public ObjectInputStream in;
 	public byte[] bitmap;
+	public FileManager file;
 	
-	Peer(String peerId, String host, String port, String hasFile, Property prop){
-		this.peerId = peerId;
-		this.hostName = host;
-		this.port = port;
-		this.hasFile = hasFile.equals("1") ? true : false;
+	
+	Peer(Property prop){
 		this.prop = prop;
-		
 		createPeerDir();
-		
+		initialize();
 	}
 	
 	public String get_peerId() {
-		return peerId;
+		return prop.peerId;
 	}
 
 	public String get_hostName() {
-		return hostName;
+		return prop.hostName;
 	}
 
 	public String get_port() {
-		return port;
+		return prop.port;
+	}
+	
+	public void initialize(){
+		file = new FileManager(prop);
+		
 	}
 	
 	public void createPeerDir(){
-		String dirName = "peer_"+peerId;
+		String dirName = "peer_"+prop.peerId;
 		String currDir = System.getProperty("user.dir");
 		File newDir = new File(currDir+"//"+dirName);
 		if(!newDir.isDirectory())
 			newDir.mkdir();
 	}
 	
-	@Override
-	public String toString(){
-		return (peerId+" "+hostName+" "+port+" "+hasFile);
-	}
+//	@Override
+//	public String toString(){
+//		return (peerId+" "+hostName+" "+port+" "+hasFile);
+//	}
 }

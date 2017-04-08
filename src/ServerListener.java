@@ -9,14 +9,14 @@ class ServerListener implements Runnable {
     private int port;
     private List<Message> messagesFromPeers;
 
-    public ServerListener(int port, List<Message> messagesFromPeers) {
-        this.port = port;
+    public ServerListener(String port, List<Message> messagesFromPeers) {
+        this.port = Integer.parseInt(port);
         this.messagesFromPeers = messagesFromPeers;
     }
 
     @Override
     public void run() {
-        //System.out.println("The server is running waiting for connections." + '\n');
+        System.out.println("The server is running waiting for connections." + '\n');
         int clientIndex = 0;
         ServerSocket listenerSocket = null;
         try {
@@ -24,7 +24,7 @@ class ServerListener implements Runnable {
                 try {
                     listenerSocket = new ServerSocket(port);
                     new Thread(new ServerRequestHandler(listenerSocket.accept(), clientIndex , messagesFromPeers)).start();
-                    //System.out.println("Client "  + clientNum + " is connected!");
+//                    System.out.println("Client "  + clientNum + " is connected!");
                     clientIndex++;
 //                } catch (SocketException e) {
 //                    Thread.sleep(50);
