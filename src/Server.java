@@ -13,18 +13,19 @@ public class Server {
 
 	public  List<Message> messagesFromPeers;
 
-	private int peerId;
-	private String hostName;
-	private int portNumber; //The listener will be listening on this port number
+//	private int peerId;
+//	private String hostName;
+//	private int portNumber; //The listener will be listening on this port number
+	
+	Property prop;
 
 
 
-
-	public Server(int peerId, String hostName, int portNumber) {
-		this.peerId = peerId;
-		this.hostName = hostName;
-		this.portNumber = portNumber;
+	public Server(Property prop) {
+		this.prop = prop;
+//		this.hostName = hostName;
+//		this.portNumber = portNumber;
 		messagesFromPeers = new ArrayList<Message>();
-		new Thread(new ServerListener(portNumber,messagesFromPeers)).start();
+		new Thread(new ServerListener(prop.port,messagesFromPeers)).start();
 	}
 }

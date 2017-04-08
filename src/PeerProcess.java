@@ -2,18 +2,17 @@ import java.io.*;
 import java.util.*;
 
 class PeerProcess{
-	static int index;
 	static int peerId;
 	final static String cfgFile = "PeerInfo.cfg";
 	final static String commonCfg = "Common.cfg";
 	
 	public static void main(String args[]) throws FileNotFoundException {
-//		peerId = Integer.parseInt(args[1]);
+		peerId = Integer.parseInt(args[0]);
 		
 		Property prop = parseCommonCfg();
 		ArrayList<Peer> peers = parsePeerInfo(prop);
 		
-		CurrentClient c = new CurrentClient(index, peers);
+		CurrentClient c = new CurrentClient(peers);
 		
 	}
 	
@@ -25,10 +24,10 @@ class PeerProcess{
 			String line = cfg.readLine();
 			while(line != null){
 				String items[] = line.split("\\s+");
-				Peer p = new Peer(items[0],items[1],items[2],items[3], prop);
-				if(Integer.parseInt(p.get_peerId()) == peerId)
-					index = i;
+				prop.indexMap.put(peerId, i);
 				i++;
+				prop.addPeerProp(items);
+				Peer p = new Peer(prop);
 				peer.add(p);
 				line = cfg.readLine();
 			}
