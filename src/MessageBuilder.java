@@ -47,6 +47,21 @@ class Message {
     }
 
 
+    public Message(int length, MessageType type, byte[] payload) {
+        this.length = length;
+        this.messageLength = ByteBuffer.allocate(4).putInt(length).array();
+        this.type = type;
+
+        if (hasPayload(type)) {
+            this.payload = new byte[length];
+            this.payload = payload;
+        }
+        else {
+            this.payload = null;
+        }
+
+    }
+
     public Message(int length, byte[] payload, MessageType mtype) {
         this.length = length;
         this.messageLength = ByteBuffer.allocate(4).putInt(length).array();
@@ -105,19 +120,55 @@ public class MessageBuilder {
         return handshake;
     }
 
-    byte[] createBitField(int length, byte[] payload, MessageType mtype) {
-        Message message = new Message(length, payload, mtype);
+    public byte[] createBitfield(byte[] bitfield) {
+        //create bitfield message and send it to peers
+        Message message = new Message(bitfield.length, MessageType.BITFIELD, bitfield);
+        //System.out.println("sending bitfield: " + bitfield.toString());
+        return message.getMessageBytes();
+
+    }
+
+    public  byte[] createInterested(int peerId) {
+        Message message = new Message(0,MessageType.INTERESTED, null);
         return message.getMessageBytes();
     }
 
-    byte[] createIntereted(int length, byte[] payload, MessageType mtype) {
-        Message message = new Message(length, payload, mtype);
+    public byte[]  createNotInterested(int peerId) {
+        Message message = new Message(0,MessageType.NOT_INTERESTED, null);
         return message.getMessageBytes();
     }
 
-
-    byte[] createNotIntereted(int length, byte[] payload, MessageType mtype) {
-        Message message = new Message(length, payload, mtype);
+    public byte[] createHave(int index, int pieceNumber) {
+        byte[] pieceIndex = ByteBuffer.allocate(4).putInt(pieceNumber).array();
+        Message message = new Message(4,MessageType.HAVE,pieceIndex);
         return message.getMessageBytes();
+    }
+
+    public byte[] createFilePiece(int pieceSize,byte filePieces[][] ,int pieceNumber) {
+        //Send file piece to a given server
+        Message message = new Message(pieceSize, MessageType.PIECE, filePieces[pieceNumber]);
+        return message.getMessageBytes();
+    }
+
+    public byte[] createChoke(int index) {
+        //Send a choke message to non-preferred peers
+        Message message = new Message(0,MessageType.CHOKE, null);
+        return message.getMessageBytes();
+    }
+
+    public byte[] sendUnchoke(int index) {
+        //Send a choke message to non-preferred peers
+        Message message = new Message(0,MessageType.UNCHOKE, null);
+        return message.getMessageBytes();
+    }
+
+    private byte[] sendRequest(int index, int pieceNumber) {
+        //send a request message to a given inde
+        byte[] pieceIndex = ByteBuffer.allocate(4).putInt(pieceNumber).array();
+        Message message = new Message(4,MessageType.REQUEST,pieceIndex);
+
+        //logger.info("Sending request " + pieceNumber + " to server " + index + '\n');
+        return message.getMessageBytes();
+
     }
 }
