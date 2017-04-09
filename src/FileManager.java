@@ -10,20 +10,15 @@ public class FileManager {
 	byte[][] fileParts;
 	
 	public FileManager(Property prop){
-//		System.out.println("Entering FileManager:"+prop.peerId);
 		this.prop = prop;
 		this.totalBytes = (int)Math.ceil((double)prop.numberOfPieces/8);
-		
 		bitField = new byte[totalBytes+1];
 		fileParts = new byte[prop.numberOfPieces][prop.pieceSize];
-//		System.out.println("My id :" +prop.peerId+"\n My hasFile : "+prop.hasFile);
 		if(prop.hasFile){
 			Arrays.fill( bitField, (byte) 1 );
 			try{
 				File file = new File("peer_" + prop.peerId + "\\" + prop.fileName);
-//	    	 	System.out.println(file);
 	    	 	FileInputStream inputStream = new FileInputStream(file);
-//	    	 	System.out.println(file.getAbsolutePath());
 				for(int i=0;i<fileParts.length;i++){
 					inputStream.read(fileParts[i++]);  //Check with a huge file. Out of memory errors
 				}

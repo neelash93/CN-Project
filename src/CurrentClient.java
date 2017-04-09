@@ -7,11 +7,13 @@ public class CurrentClient {
 	Property prop;
 	public Communication comm;
 	public FileManager file;
+	Log l;
+	
 	public CurrentClient(int index, ArrayList<Peer> peers){
 		this.allPeers = peers;
 		this.index = index;
 		prop = allPeers.get(index).prop;
-//		System.out.println("Index"+index);
+		l = new Log(prop.peerId);
 		file = new FileManager(prop);
 		comm = new Communication(prop,allPeers);
 		
