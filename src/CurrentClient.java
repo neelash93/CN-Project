@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -11,7 +12,7 @@ public class CurrentClient {
 	public Communication comm;
 	public FileManager fileManager;
 	boolean allFilesReceived;
-	public MessageBuilder message;
+	public MessageBuilder messageBuilder;
 	public CurrentClient(int index, ArrayList<Peer> peers){
 		this.allPeers = peers;
 		this.index = index;
@@ -67,13 +68,14 @@ public class CurrentClient {
 
 	}
 	
-	private static void sendBitfield(int index) {
-		/*
-        //create bitfield message and send it to peers
-        Message bitfieldMessage = new Message(bitfield.length, (byte)Message.bitfield, bitfield);
-        //System.out.println("sending bitfield: " + bitfield.toString());
-        sendMessage(bitfieldMessage.getMessageBytes(), index);
-        */
+	  private void sendRequest(int index, int pieceNumber) {    
+		  byte[] pieceMessage = messageBuilder.createRequest(index , pieceNumber);
+			sendMessage(pieceMessage, index);
+	  }
+	  
+	private void sendBitfield(int index) {        
+        byte[] bitfieldMessage = messageBuilder.createBitfield(fileManager.bitField);
+		sendMessage(bitfieldMessage, index);
     }
 	
     //send a message to the output stream
@@ -91,7 +93,7 @@ public class CurrentClient {
     }
 
 	public void sendHandShake(String peerId) {
-		byte[] handshake = message.createHandshake(Integer.parseInt(peerId));
+		byte[] handshake = messageBuilder.createHandshake(Integer.parseInt(peerId));
 		sendMessage(handshake, Integer.parseInt(peerId));
 	}
 	
@@ -109,8 +111,8 @@ public class CurrentClient {
         }
         
         BitSet selfbits = new BitSet();
-        for (int i = 0; i < peer.bitfield.length * 8; i++) {
-            if ((bitfield[bitfield.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+        for (int i = 0; i < fileManager.bitField.length * 8; i++) {
+            if ((fileManager.bitField[fileManager.bitField.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
                   selfbits.set(i);
             }
        }
@@ -150,7 +152,8 @@ public class CurrentClient {
   */      
         //Choose a random value from the available bits
         if (exists) {
-            return val[rng.nextInt(j)];
+        	int a = (int) (Math.random() * j);
+            return a;
         } else {
             return -1;
         }
