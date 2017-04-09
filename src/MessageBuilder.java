@@ -156,13 +156,13 @@ public class MessageBuilder {
         return message.getMessageBytes();
     }
 
-    public byte[] sendUnchoke(int index) {
+    public byte[] createUnchoke(int index) {
         //Send a choke message to non-preferred peers
         Message message = new Message(0,MessageType.UNCHOKE, null);
         return message.getMessageBytes();
     }
 
-    private byte[] sendRequest(int index, int pieceNumber) {
+    public byte[] createRequest(int index, int pieceNumber) {
         //send a request message to a given inde
         byte[] pieceIndex = ByteBuffer.allocate(4).putInt(pieceNumber).array();
         Message message = new Message(4,MessageType.REQUEST,pieceIndex);
