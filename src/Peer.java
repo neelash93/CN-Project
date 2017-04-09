@@ -20,6 +20,7 @@ public class Peer {
 	
 	Peer(Property prop){
 		this.prop = prop;
+		System.out.println("Peer Class INIT:"+prop.peerId);
 		createPeerDir();
 		initialize();
 	}
