@@ -2,6 +2,7 @@
  * Created by Prateek
  */
 import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.List;
 
 
@@ -26,8 +27,9 @@ class ServerListener implements Runnable {
                     new Thread(new ServerRequestHandler(listenerSocket.accept(), clientIndex , messagesFromPeers)).start();
 //                    System.out.println("Client "  + clientNum + " is connected!");
                     clientIndex++;
-//                } catch (SocketException e) {
-//                    Thread.sleep(50);
+                } catch (SocketException e) {
+                    Thread.sleep(50);
+                    e.printStackTrace();
                 } finally {
                     listenerSocket.close();
                 }

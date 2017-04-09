@@ -22,14 +22,15 @@ public class Communication {
 		while(connectedPeers<=prop.indexMap.size()){
 			int j=1;
 			for(int i=0;i<prop.indexMap.size();i++){
+//				System.out.println("Own Indexw);
 				if(i!=prop.getOwnIndex()&& ! allPeers.get(i).state.hasMadeConnection){
 					System.out.println("Connecting to peer:"+allPeers.get(i).get_hostName()+" on port "+ allPeers.get(i).get_port());
-				}
+				
 
 				try{
 					requestConn[i]=new Socket(allPeers.get(i).get_hostName(), allPeers.get(i).get_port());
 					if(requestConn[i].isConnected()){
-						System.out.println("Connected to Peer"+j++);
+//						System.out.println("Connected to Peer "+i+"  "+(j++));
 						connectedPeers++;
 						allPeers.get(i).state.hasMadeConnection=true;
 					}
@@ -39,11 +40,13 @@ public class Communication {
 				}catch(IOException e){
 					allPeers.get(i).state.hasConnectionRefused=true;
 				}
+				
+				}
 
 			}
 		}
 
-		if(connectedPeers!=connectedPeers){
+		if(connectedPeers!=prop.indexMap.size()){
 			try{
 				System.out.println("Wating to reconnect to peers");
 				Thread.sleep(10000);

@@ -13,14 +13,13 @@ public class Peer {
 //    public ObjectOutputStream out;
 //    public ObjectInputStream in;
 //	public byte[] bitmap;
-	public FileManager file;
+//	public FileManager file;
 	public PeerState state;
 
 	
 	
 	Peer(Property prop){
 		this.prop = prop;
-		System.out.println("Peer Class INIT:"+prop.peerId);
 		createPeerDir();
 		initialize();
 	}
@@ -38,7 +37,7 @@ public class Peer {
 	}
 	
 	public void initialize(){
-		file = new FileManager(prop);
+//		file = new FileManager(prop);
 		state = new PeerState();
 		
 	}

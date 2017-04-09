@@ -11,7 +11,7 @@ class PeerProcess{
 		
 		Property prop = parseCommonCfg();
 		ArrayList<Peer> peers = parsePeerInfo(prop);
-		CurrentClient c = new CurrentClient(peers);
+		CurrentClient c = new CurrentClient(Property.indexMap.get(peerId), peers);
 		
 	}
 	
@@ -23,11 +23,10 @@ class PeerProcess{
 			String line = cfg.readLine();
 			while(line != null){
 				String items[] = line.split("\\s+");
-//				System.out.println(items[0]);
 				prop.indexMap.put(items[0], i++);
-				i++;
-				prop.addPeerProp(items);
-				Peer p = new Peer(prop);
+				Property t = new Property(prop);
+				t.addPeerProp(items);
+				Peer p = new Peer(t);
 				peer.add(p);
 				line = cfg.readLine();
 			}
