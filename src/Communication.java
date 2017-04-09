@@ -20,7 +20,7 @@ public class Communication {
 //		in = new ObjectInputStream[prop.indexMap.size()];
 		int connectedPeers=1;
 		while(connectedPeers<=prop.indexMap.size()){
-
+			int j=1;
 			for(int i=0;i<prop.indexMap.size();i++){
 				if(i!=prop.getOwnIndex()&& ! allPeers.get(i).state.hasMadeConnection){
 					System.out.println("Connecting to peer:"+allPeers.get(i).get_hostName()+" on port "+ allPeers.get(i).get_port());
@@ -29,6 +29,7 @@ public class Communication {
 				try{
 					requestConn[i]=new Socket(allPeers.get(i).get_hostName(), allPeers.get(i).get_port());
 					if(requestConn[i].isConnected()){
+						System.out.println("Connected to Peer"+j++);
 						connectedPeers++;
 						allPeers.get(i).state.hasMadeConnection=true;
 					}

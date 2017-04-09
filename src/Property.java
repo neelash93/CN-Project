@@ -16,7 +16,7 @@ public class Property {
 	int fileSize;
 	int pieceSize;
 	int numberOfPieces;
-	public HashMap<Integer, Integer> indexMap = new HashMap<>();
+	public HashMap<String, Integer> indexMap = new HashMap<>();
 	
 	public Property(String[] arr) {
 		int i=0;
@@ -61,10 +61,16 @@ public class Property {
 		return indexMap.get(peerId);
 	}
 
-	public int getOwnIndex(){return indexMap.get(peerId);}
+	public int getOwnIndex(){
+		System.out.println(indexMap);
+		
+		return indexMap.get(peerId);
+		
+	}
 	
 	public void addPeerProp(String arr[]){
 		this.peerId = arr[0];
+//		System.out.println(this.peerId);
 		this.hostName = arr[1];
 		this.port = Integer.parseInt(arr[2]);
 		this.hasFile = arr[3].equals("1") ? true : false;
