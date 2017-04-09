@@ -162,7 +162,7 @@ public class MessageBuilder {
         return message.getMessageBytes();
     }
 
-    private byte[] createRequest(int index, int pieceNumber) {
+    public byte[] createRequest(int index, int pieceNumber) {
         //send a request message to a given inde
         byte[] pieceIndex = ByteBuffer.allocate(4).putInt(pieceNumber).array();
         Message message = new Message(4,MessageType.REQUEST,pieceIndex);

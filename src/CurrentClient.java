@@ -17,16 +17,16 @@ public class CurrentClient {
 		this.allPeers = peers;
 		this.index = index;
 		prop = allPeers.get(index).prop;
-//		System.out.println("Index"+index);
-		file = new FileManager(prop);
+		//		System.out.println("Index"+index);
+		fileManager = new FileManager(prop);
 		comm = new Communication(prop,allPeers);
-		
+
 	}
-	
+
 	public void process() {
 		while(!allFilesReceived) {
 			setUpConnections();
-			
+
 		}
 	}
 
@@ -40,7 +40,7 @@ public class CurrentClient {
 					// Logger
 				}
 			}
-			
+
 			//if we havent sent the bitfield and we are connected and we have received the handshake:
 			if (!allPeers.get(i).state.hasBitfieldSent && allPeers.get(i).state.hasMadeConnection && allPeers.get(i).state.hasHandshakeReceived) {
 				//Send the bitfield
@@ -49,113 +49,94 @@ public class CurrentClient {
 				System.out.println("Sent bitfield to host " + allPeers.get(i).prop.hostName + "on port " + allPeers.get(i).prop.port + '\n');
 				//logger.info("Sent bitfield to host " + neighbors[i].hostName + " on port " + neighbors[i].portNumber + '\n');
 			}
-			
-			 //Request a piece at random if we are able to:
-            if (allPeers.get(i).state.hasBitfieldReceived && 
-            		allPeers.get(i).state.choked == false &&
-            		allPeers.get(i).state.isWaitingForPiece == false) {
 
-            	allPeers.get(i).state.isWaitingForPiece = true;
-                int requestedPieceNumber = getRandomPiece(allPeers.get(i));
-                allPeers.get(i).state.pieceNumber = requestedPieceNumber;
+			//Request a piece at random if we are able to:
+			if (allPeers.get(i).state.hasBitfieldReceived && 
+					allPeers.get(i).state.choked == false &&
+					allPeers.get(i).state.isWaitingForPiece == false) {
 
-                //Call the method to send the request:
-                if (requestedPieceNumber != -1) {
-                    sendRequest(i, requestedPieceNumber);
-                }
-            }
-        }
+				allPeers.get(i).state.isWaitingForPiece = true;
+				int requestedPieceNumber = getRandomPiece(allPeers.get(i));
+				allPeers.get(i).state.pieceNumber = requestedPieceNumber;
+
+				//Call the method to send the request:
+				if (requestedPieceNumber != -1) {
+					sendRequest(i, requestedPieceNumber);
+				}
+			}
+		}
 
 	}
-	
-	  private void sendRequest(int index, int pieceNumber) {    
-		  byte[] pieceMessage = messageBuilder.createRequest(index , pieceNumber);
-			sendMessage(pieceMessage, index);
-	  }
-	  
+
+	private void sendRequest(int index, int pieceNumber) {    
+		byte[] pieceMessage = messageBuilder.createRequest(index, pieceNumber);
+		sendMessage(pieceMessage, index);
+	}
+
 	private void sendBitfield(int index) {        
-        byte[] bitfieldMessage = messageBuilder.createBitfield(fileManager.bitField);
+		byte[] bitfieldMessage = messageBuilder.createBitfield(fileManager.bitField);
 		sendMessage(bitfieldMessage, index);
-    }
-	
-    //send a message to the output stream
+	}
+
+	//send a message to the output stream
 	public void sendMessage(byte[] msg, int socketIndex)
-    {
-        try {
-            //stream write the message
-            comm.out[socketIndex].writeObject(msg);
-            comm.out[socketIndex].flush();
-        }
-        catch(IOException ioException){
-        	System.err.println("Error sending message.");
-            ioException.printStackTrace();
-        }
-    }
+	{
+		try {
+			//stream write the message
+			comm.out[socketIndex].writeObject(msg);
+			comm.out[socketIndex].flush();
+		}
+		catch(IOException ioException){
+			System.err.println("Error sending message.");
+			ioException.printStackTrace();
+		}
+	}
 
 	public void sendHandShake(String peerId) {
 		byte[] handshake = messageBuilder.createHandshake(Integer.parseInt(peerId));
 		sendMessage(handshake, Integer.parseInt(peerId));
 	}
-	
+
 	private int getRandomPiece(Peer peer) {
-        //BigInteger incomingBitfieldInt = new BigInteger(neighbor.bitmap);
-        //BigInteger selfBitfieldInt = new BigInteger(bitfield);
+		//BigInteger incomingBitfieldInt = new BigInteger(neighbor.bitmap);
+		//BigInteger selfBitfieldInt = new BigInteger(bitfield);
 
-        //BigInteger interestingBits = incomingBitfieldInt.and(selfBitfieldInt.and(incomingBitfieldInt).not());
-        
-        BitSet incomingbits = new BitSet();
-        for (int i = 0; i < peer.state.bitmap.length * 8; i++) {
-             if ((peer.state.bitmap[peer.state.bitmap.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
-                   incomingbits.set(i);
-             }
-        }
-        
-        BitSet selfbits = new BitSet();
-        for (int i = 0; i < fileManager.bitField.length * 8; i++) {
-            if ((fileManager.bitField[fileManager.bitField.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
-                  selfbits.set(i);
-            }
-       }
-        
-       incomingbits.andNot(selfbits);
-       int fromIndex = 0;
-       int j = 0;
-       boolean exists = false;
-       int[] val = new int[incomingbits.length()];
-       
-       while(fromIndex < incomingbits.length()) {
-    	   val[j++] = incomingbits.nextSetBit(fromIndex);
-    	   fromIndex = val[j];
-    	   exists = true;
-       }
-       
-/*  
-       for (int i = 0; i < incomingbits.length(); i++) {
-    	   if(incomingbits.get(i)) {
-    		   val[j++] = i; 
-    		   exists = true;
-    	   }
-       }
-       
+		//BigInteger interestingBits = incomingBitfieldInt.and(selfBitfieldInt.and(incomingBitfieldInt).not());
 
-        int[] values = new int[interestingBits.bitLength()];
-        int j = 0;
-        boolean exists = false;
-        for (int i = 0; i < interestingBits.bitLength(); i++) {
-            if (interestingBits.testBit(i)) {
-                values[j++] = i;
-                exists = true;
+		BitSet incomingbits = new BitSet();
+		for (int i = 0; i < peer.state.bitmap.length * 8; i++) {
+			if ((peer.state.bitmap[peer.state.bitmap.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+				incomingbits.set(i);
+			}
+		}
 
-//                System.out.println("Has bit: " + i);
-            }    
-        }
-  */      
-        //Choose a random value from the available bits
-        if (exists) {
-        	int a = (int) (Math.random() * j);
-            return a;
-        } else {
-            return -1;
-        }
-    }
+		BitSet selfbits = new BitSet();
+		for (int i = 0; i < fileManager.bitField.length * 8; i++) {
+			if ((fileManager.bitField[fileManager.bitField.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+				selfbits.set(i);
+			}
+		}
+
+		incomingbits.andNot(selfbits);
+		int j = 0;
+		boolean exists = false;
+		int[] val = new int[incomingbits.length()];
+
+
+		
+		for (int i = 0; i < incomingbits.length(); i++) {
+			if(incomingbits.get(i)) {
+				val[j++] = i; 
+				exists = true;
+			}
+		}
+    
+		//Choose a random value from the available bits
+		if (exists) {
+			int a = (int) (Math.random() * j);
+			return a;
+		} else {
+			return -1;
+		}
+	}
 }
