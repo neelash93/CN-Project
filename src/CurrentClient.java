@@ -21,13 +21,11 @@ public class CurrentClient {
 		l = new Log(prop.peerId);
 		fileManager = new FileManager(prop);
 		comm = new Communication(prop,allPeers);
-
 	}
 
 	public void process() {
 		while(!allFilesReceived) {
 			setUpConnections();
-
 		}
 	}
 
@@ -35,7 +33,7 @@ public class CurrentClient {
 		for(int i = 0; i < allPeers.size(); i++) {
 			if(i != index) {
 				if(!allPeers.get(i).state.hasHandshakeSent && allPeers.get(i).state.hasMadeConnection) {
-					sendHandShake(allPeers.get(i).prop.peerId);
+					sendHandShake(i, prop.peerId);
 					allPeers.get(i).state.hasHandshakeSent = true;
 					System.out.println("Peer "+ prop.peerId + " is connected from Peer "+ allPeers.get(i).prop.peerId + '\n');
 					// Logger
@@ -93,9 +91,9 @@ public class CurrentClient {
 		}
 	}
 
-	public void sendHandShake(String peerId) {
+	public void sendHandShake(int index, String peerId) {
 		byte[] handshake = messageBuilder.createHandshake(Integer.parseInt(peerId));
-		sendMessage(handshake, Integer.parseInt(peerId));
+		sendMessage(handshake, index);
 	}
 
 	private int getRandomPiece(Peer peer) {
