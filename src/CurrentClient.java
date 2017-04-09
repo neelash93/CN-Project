@@ -1,10 +1,14 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class CurrentClient {
 	int index;
-	ArrayList<Peer> allPeers;
-	public CurrentClient(int index, ArrayList<Peer> peers){
-		this.index = index;
-		this.allPeers = allPeers;
+	List<Peer> allPeers;
+	Property prop;
+	public Communication comm;
+	public CurrentClient(ArrayList<Peer> peers){
+		this.allPeers = peers;
+		prop = allPeers.get(index).prop;
+		comm = new Communication(prop,allPeers);
 	}
 }

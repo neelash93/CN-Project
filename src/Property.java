@@ -1,5 +1,14 @@
+import java.util.HashMap;
 
 public class Property {
+	
+	//Peer properties
+	public String peerId;
+	public String hostName;
+	public int port;
+	public boolean hasFile;
+	
+	//Common properties
 	int prefferedNeighbours; 
 	int unchokingInterval;
 	int optUnchokingInterval;
@@ -7,6 +16,7 @@ public class Property {
 	int fileSize;
 	int pieceSize;
 	int numberOfPieces;
+	public HashMap<Integer, Integer> indexMap = new HashMap<>();
 	
 	public Property(String[] arr) {
 		int i=0;
@@ -17,8 +27,7 @@ public class Property {
 		this.fileSize = Integer.parseInt(arr[i++]);
 		this.pieceSize = Integer.parseInt(arr[i++]);
 		
-		this.numberOfPieces = (int)Math.ceil(fileSize/pieceSize);
-
+		this.numberOfPieces = (int)Math.ceil((double)fileSize/pieceSize);
 	}
 	
 	public int getPrefferedNeighbours() {
@@ -47,6 +56,18 @@ public class Property {
 
 	public int getNumberOfPieces() {
 		return numberOfPieces;
+	}
+	public int getIndex(int peerId) {
+		return indexMap.get(peerId);
+	}
+
+	public int getOwnIndex(){return indexMap.get(peerId);}
+	
+	public void addPeerProp(String arr[]){
+		this.peerId = arr[0];
+		this.hostName = arr[1];
+		this.port = Integer.parseInt(arr[2]);
+		this.hasFile = arr[3].equals("1") ? true : false;
 	}
 
 	@Override
