@@ -24,11 +24,6 @@ class Message {
     private MessageType type;
     private byte[] messageLength;
     private byte[] payload;
-
-    public int getClientId() {
-        return clientId;
-    }
-
     private int clientId;
     public int getLength() {
         return length;
@@ -98,6 +93,10 @@ class Message {
 
         return messageBuffer.array();
     }
+
+	public Integer getClientId() {
+		return clientId;
+	}
 
 }
 

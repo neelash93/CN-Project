@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -68,7 +69,6 @@ public class CurrentClient {
 
 			}
 
-
 			processReceivedMessages();
 		}
 	}
@@ -115,9 +115,9 @@ public class CurrentClient {
 			allPeers.get(peerIndex).state.bitmap=msg.getPayload();
 			allPeers.get(peerIndex).state.hasBitfieldReceived=true;
 			if(checkIfNeedPieces(allPeers.get(peerIndex))){
-//				sendInterested(peerIndex);
+				sendInterested(peerIndex);
 			}else{
-//				sendNotInterested(peerIndex);
+				sendNotInterested(peerIndex);
 			}
 		}
 		else if(msg.getType()==MessageType.INTERESTED){
@@ -177,7 +177,7 @@ public class CurrentClient {
 				int i = p.prop.getOwnIndex();
 				if(i == index) // or prop.getOwnIndex()
 					continue;
-				//sendHave(i,allPeers.get(peerIndex).state.pieceNumber);
+				sendHave(i,allPeers.get(peerIndex).state.pieceNumber);
 			}
 			allPeers.get(peerIndex).state.pieceNumber = -1;
 			
@@ -186,19 +186,15 @@ public class CurrentClient {
 				int i = p.prop.getOwnIndex();
 				if(i == index) // or prop.getOwnIndex()
 					continue;
-				boolean hasInterest;
+				boolean hasInterest = false;
 				if(allPeers.get(i).state.bitmap != null){
 					hasInterest = checkIfNeedPieces(allPeers.get(i));
 				}
-				
-				//if(hasInterest == false)
-					//sendNotInterested(i);
+				if(hasInterest == false)
+					sendNotInterested(i);
 			}
 			
 			allFilesReceived = checkAllReceived();
-			
-			
-			
 		}
 		else if(msg.getType() == MessageType.REQUEST){
 //			ByteBuffer buffer = ByteBuffer.wrap(incomingMessage.payload);
@@ -206,10 +202,10 @@ public class CurrentClient {
 //            //If they are choked
 //            //if (!neighbors[messageIndex].choked)    //Uncomment to run legit m,m.
 //            int pieceNumber = buffer.getInt();
-//            sendFilePiece(messageIndex, pieceNumber);
+//           sendFilePiece(messageIndex, pieceNumber);
             
 			int partIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();  //Alternative for above code;
-//			sendFileParts(peerIndex, partIndex);
+			sendFileParts(peerIndex, partIndex);
             
 		}
 		else if(msg.getType() == MessageType.CHOKE){
@@ -303,6 +299,28 @@ public class CurrentClient {
 	      byte[] message = messageBuilder.createChoke(index);
 			sendMessage(message, index);
 	 }
+	 
+	 public void sendInterested(int index){
+	      byte[] message = messageBuilder.createInterested(index);
+	      sendMessage(message, index);
+
+	   }
+	 
+	 public void sendFileParts(int index,int partNumber){
+	      byte[] message = messageBuilder.createFilePiece(prop.pieceSize,fileManager.fileParts,partNumber);
+	      sendMessage(message, index);
+	   }
+
+	   public void sendNotInterested(int index){
+	      byte[] message = messageBuilder.createNotInterested(index);
+	      sendMessage(message, index);
+	   }
+	   
+	   public void sendHave(int index, int pieceNumber) {
+	    	//send a have message to a given index
+	        byte[] message = messageBuilder.createHave(index, pieceNumber);
+		      sendMessage(message, index);
+	    }
 	 
 	public boolean checkIfNeedPieces(Peer peer) {
 
