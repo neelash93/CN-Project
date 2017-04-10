@@ -70,7 +70,7 @@ public class Property {
 		return numberOfPieces;
 	}
 	public int getIndex(int peerId) {
-		return indexMap.get(peerId);
+		return indexMap.get(String.valueOf(peerId));
 	}
 
 	public int getOwnIndex(){

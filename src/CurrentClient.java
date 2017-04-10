@@ -1,11 +1,10 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 
 public class CurrentClient {
+
 	int index;
 	List<Peer> allPeers;
 	Property prop;
@@ -26,11 +25,81 @@ public class CurrentClient {
 	public void process() {
 		while(!allFilesReceived) {
 			setUpConnections();
+			//setup timer
+			processReceivedMessages();
+
+
+
+
+
+
 
 		}
 	}
 
+	public void processReceivedMessages(){
+		int peerIndex = -1;
+
+		List<Message> recievedMessages = comm.getRecievedMessages();
+		List <Message> processedMessages =new ArrayList<Message>();
+		synchronized(recievedMessages){
+			for(Message msg:recievedMessages){
+				peerIndex=comm.connectionOrderMap.getOrDefault(msg.getClientId(),-1);
+//				if(peerIndex!=-1&& msg.getType()!=MessageType.HANDSHAKE){
+//					continue;
+//				}
+//
+//				if(msg.getType()!=MessageType.HANDSHAKE){
+//					peerIndex = prop.getIndex(peerIndex);
+//				}
+//
+				//Equivalent block
+				if(msg.getType()!=MessageType.HANDSHAKE){
+					if(peerIndex != -1) continue;
+					peerIndex = prop.getIndex(peerIndex);
+				}
+
+				if(peerIndex!=-1){
+					if(msg.getType()!=MessageType.BITFIELD&&!allPeers.get(peerIndex).state.hasBitfieldReceived&&allPeers.get(peerIndex).state.hasHandshakeReceived){
+					   continue;
+					}
+				}
+
+				processMessage(msg,processedMessages, peerIndex);
+			}
+		}
+	}
+
+
+
+	public void processMessage(Message msg,List<Message>processedMessges, int peerIndex){
+		if(msg.getType()==MessageType.HANDSHAKE){
+			comm.connectionOrderMap.put(msg.getClientId(),msg.getLength());
+			peerIndex=prop.getIndex(msg.getLength());
+			allPeers.get(peerIndex).state.hasHandshakeReceived=true;
+		}else if(msg.getType()==MessageType.BITFIELD){
+			allPeers.get(peerIndex).state.bitmap=msg.getPayload();
+			allPeers.get(peerIndex).state.hasBitfieldReceived=true;
+			if(checkifNeedPieces(allPeers.get(peerIndex))){
+				sendInterested(peerIndex);
+			}else{
+				sendNotInterested(peerIndex);
+			}
+		}else if(msg.getType()==MessageType.INTERESTED){
+			allPeers.get(peerIndex).state.interested=true;
+		}else if(msg.getType()==MessageType.NOT_INTERESTED){
+			allPeers.get(peerIndex).state.interested=false;
+		}else if(msg.getType()==MessageType.HAVE){
+			
+
+
+		}
+
+
+	}
+
 	public void setUpConnections() {
+
 		for(int i = 0; i < allPeers.size(); i++) {
 			if(i != index) {
 				if(!allPeers.get(i).state.hasHandshakeSent && allPeers.get(i).state.hasMadeConnection) {
@@ -86,9 +155,9 @@ public class CurrentClient {
 			comm.out[socketIndex].writeObject(msg);
 			comm.out[socketIndex].flush();
 		}
-		catch(IOException ioException){
+		catch(IOException e){
 			System.err.println("Error sending message.");
-			ioException.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 
