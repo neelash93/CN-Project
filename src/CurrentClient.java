@@ -1,7 +1,10 @@
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -16,7 +19,8 @@ public class CurrentClient {
 	int index;
 	List<Peer> allPeers;
 	Property prop;
-	public Communication comm;
+//	public Communication comm;
+	public static Communication comm1;
 	public FileManager fileManager;
 	boolean allFilesReceived;
 	int optimisticNeighbor;
@@ -30,16 +34,27 @@ public class CurrentClient {
 		this.index = index;
 		prop = allPeers.get(index).prop;
 		l = new Log(prop.peerId);
+		System.out.println("Initiliazed log object in current Client");
 		fileManager = new FileManager(prop);
-		comm = new Communication(prop, allPeers);
+		System.out.println("Initialized fileManager object in CuurentClient");
+		//Trying to use new Communication specifics everywhere instead of old comm object
+//		comm = new Communication(prop, allPeers);
+		comm1 = new Communication(prop, allPeers);
+		
+		System.out.println("Initialized COmm object");
 		scheduler = new Scheduler();
+		System.out.println("Init scheduler object");
 		preferredPeers = new ArrayList<>();
 		System.out.println("REACHES BEFORE PROCESS");
 		process();
 	}
 
 	public void process() {
-		int iteration = 0;
+		try{
+			comm1.startServer(Integer.parseInt(prop.peerId), prop.hostName, prop.port);
+			comm1.initOPStreams();
+			System.out.println("Reaches After initiating server");
+			int iteration = 0;
 		while (!allFilesReceived) {
 			setUpConnections();
 			//setup timer
@@ -71,16 +86,41 @@ public class CurrentClient {
 			}
 
 			processReceivedMessages();
+			
+		}
+//		catch (ConnectException e) {
+//            l.log("Connection refused. You need to initiate a server first.");
+//        }
+//        //catch ( ClassNotFoundException e ) {
+//            //System.err.println("Class not found");
+//        //}
+//        catch(UnknownHostException unknownHost) {
+//            l.log("You are trying to connect to an unknown host!");
+//        }
+//        catch(IOException ioException) {
+//            l.log("IOException: See console for more details.");
+//            ioException.printStackTrace();
+//        }
+        //catch (InterruptedException e) {
+            //System.err.println("Interrupted thread execution.");
+        //}
+        finally {
+            //Close connections
+        	comm1.closeConnections();
+        }
 		}
 
 	public void processReceivedMessages(){
 		int peerIndex = -1;
 
-		List<Message> recievedMessages = comm.getRecievedMessages();
+//		List<Message> recievedMessages = comm.getRecievedMessages();
+		List<Message> recievedMessages = comm1.getRecievedMessages();
 		List <Message> processedMessages =new ArrayList<Message>();
 		synchronized(recievedMessages){
 			for(Message msg:recievedMessages){
-				peerIndex=comm.connectionOrderMap.getOrDefault(msg.getClientId(),-1);
+//				peerIndex=comm.connectionOrderMap.getOrDefault(msg.getClientId(),-1);
+				peerIndex=comm1.connectionOrderMap.getOrDefault(msg.getClientId(),-1);
+
 //				if(peerIndex!=-1&& msg.getType()!=MessageType.HANDSHAKE){
 //					continue;
 //				}
@@ -107,9 +147,13 @@ public class CurrentClient {
 
 	public void processMessage(Message msg,List<Message>processedMessges, int peerIndex){
 		if(msg.getType()==MessageType.HANDSHAKE){
-			comm.connectionOrderMap.put(msg.getClientId(),msg.getLength());
+			System.out.println("Receiving Handshake");
+//			comm.connectionOrderMap.put(msg.getClientId(),msg.getLength());
+			comm1.connectionOrderMap.put(msg.getClientId(),msg.getLength());
+
 			peerIndex=prop.getIndex(msg.getLength());
 			allPeers.get(peerIndex).state.hasHandshakeReceived=true;
+			System.out.println("Received Handshake");
 		}
 		else if(msg.getType()==MessageType.BITFIELD){
 			allPeers.get(peerIndex).state.bitmap=msg.getPayload();
@@ -275,8 +319,10 @@ public class CurrentClient {
 	public void sendMessage(byte[] msg, int socketIndex) {
 		try {
 			// stream write the message
-			comm.out[socketIndex].writeObject(msg);
-			comm.out[socketIndex].flush();
+//			comm.out[socketIndex].writeObject(msg);
+//			comm.out[socketIndex].flush();
+			comm1.out[socketIndex].writeObject(msg);
+			comm1.out[socketIndex].flush();
 		} catch(IOException e){
 
 			System.err.println("Error sending message.");
@@ -285,14 +331,18 @@ public class CurrentClient {
 	}
 
 	public void sendHandShake(int index, String peerId) {
+		System.out.println("Sending Handshake to "+peerId);
 		byte[] handshake = messageBuilder.createHandshake(Integer.parseInt(peerId));
 		sendMessage(handshake, index);
+		System.out.println("Sent Handshake");
 	}
 
 	public void sendUnchoke(int index) {
+		System.out.println("Sending unchoke");
 		// Send a choke message to non-preferred peers
 		byte[] message = messageBuilder.createUnchoke(index);
 		sendMessage(message, index);
+		System.out.println("Sent Unchoke");
 	}
 
 	 public void sendChoke(int index) {
