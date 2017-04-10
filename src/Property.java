@@ -7,6 +7,7 @@ public class Property {
 	public String hostName;
 	public int port;
 	public boolean hasFile;
+	public int partsRecieved;
 	
 	//Common properties
 	int prefferedNeighbours; 
