@@ -121,12 +121,20 @@ public class CurrentClient {
 
 //		List<Message> recievedMessages = comm.getRecievedMessages();
 		List<Message> recievedMessages = comm1.getRecievedMessages();
+		if(!recievedMessages.isEmpty())
+		System.out.println("processRecieved Called, Msgs are : \n"+recievedMessages);
+//		for(Message m : recievedMessages){
+//			System.out.println(m.getType());
+//		}
 		List <Message> processedMessages =new ArrayList<Message>();
 		synchronized(recievedMessages){
 			for(Message msg:recievedMessages){
+				System.out.println(msg.getType());
 //				peerIndex=comm.connectionOrderMap.getOrDefault(msg.getClientId(),-1);
 				peerIndex=comm1.connectionOrderMap.getOrDefault(msg.getClientId(),-1);
-
+				if(msg.getType() == MessageType.BITFIELD)
+					System.out.println("PeerIndex recieved in case of BITFIELD = "+peerIndex);
+				
 //				if(peerIndex!=-1&& msg.getType()!=MessageType.HANDSHAKE){
 //					continue;
 //				}
@@ -137,21 +145,29 @@ public class CurrentClient {
 //
 				//Equivalent block
 				if(msg.getType()!=MessageType.HANDSHAKE){
-					if(peerIndex != -1) continue;
+					if(peerIndex == -1) continue;
 					peerIndex = prop.getIndex(peerIndex);
 				}
-
-				if(peerIndex!=-1) {
+				System.out.println("Final Peer Index = "+peerIndex);
+				if(peerIndex!=-1 ) {
 					if(msg.getType()!=MessageType.BITFIELD&&!allPeers.get(peerIndex).state.hasBitfieldReceived&&allPeers.get(peerIndex).state.hasHandshakeReceived){
 					   continue;
 					}
 				}
+				System.out.println("Conditions Passed, going to process. PeerIndex = "+peerIndex);
 				processMessage(msg,processedMessages, peerIndex);
+			}
+			
+			for(Message msg : processedMessages){
+				System.out.println("Removing msg of type"+msg.getType());
+				recievedMessages.remove(msg);
 			}
 		}
 	}
 
-	public void processMessage(Message msg,List<Message>processedMessges, int peerIndex){
+	public void processMessage(Message msg,List<Message>processedMessages, int peerIndex){
+		System.out.println("Message received from :"+peerIndex);
+		System.out.println("Type of message"+msg.getType());
 		if(msg.getType()==MessageType.HANDSHAKE){
 			System.out.println("Receiving Handshake");
 //			comm.connectionOrderMap.put(msg.getClientId(),msg.getLength());
@@ -162,6 +178,7 @@ public class CurrentClient {
 			System.out.println("Received Handshake");
 		}
 		else if(msg.getType()==MessageType.BITFIELD){
+			System.out.println("Reaceiving Bitfield");
 			allPeers.get(peerIndex).state.bitmap=msg.getPayload();
 			allPeers.get(peerIndex).state.hasBitfieldReceived=true;
 			if(checkIfNeedPieces(allPeers.get(peerIndex))){
@@ -169,6 +186,7 @@ public class CurrentClient {
 			}else{
 				sendNotInterested(peerIndex);
 			}
+			System.out.println("Recieved Bitfield");
 		}
 		else if(msg.getType()==MessageType.INTERESTED){
 			allPeers.get(peerIndex).state.interested=true;
@@ -186,6 +204,7 @@ public class CurrentClient {
 			 int bitIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();
 			 BigInteger bits = new BigInteger(allPeers.get(peerIndex).state.bitmap);
 			 bits.setBit(bitIndex);
+			 allPeers.get(peerIndex).state.bitmap = bits.toByteArray();
 			 
 			 boolean peerGetsFile = checkHasFile(bits); //Seperated into function as its used in other places as well.
 			 
@@ -207,6 +226,10 @@ public class CurrentClient {
 //				 allFilesReceived = allFilesReceived & p.prop.hasFile;
 //			 }
 			 
+			 BigInteger selfbits = new BigInteger(fileManager.bitField);
+			 if(!selfbits.testBit(bitIndex))
+				 sendInterested(peerIndex);
+			 
 
 		}
 		else if(msg.getType() == MessageType.PIECE){
@@ -220,7 +243,8 @@ public class CurrentClient {
 			//Update peerFileInfo
 			boolean peerGetsFile = checkHasFile(bitsSelf);
 			allPeers.get(prop.getOwnIndex()).prop.hasFile = peerGetsFile; //Could also do prop.hasFile = ... But could conflict if same prop object is not passed to CurrClient and allPeers.get(ownIndex)
-			
+			if(peerGetsFile)
+				l.log("THIS CLIENT HAS RECIEVED THE FILE");
 			
 			//Send have msg to others
 			for(Peer p : allPeers){
@@ -266,6 +290,7 @@ public class CurrentClient {
 		}
 		else l.log("Illegal Message Type Found : " + msg.getType());
 		
+		processedMessages.add(msg);
 	}
 
 	public void setUpConnections() {
@@ -296,13 +321,16 @@ public class CurrentClient {
 			}
 
 			// Request a piece at random if we are able to:
-			if (allPeers.get(i).state.hasBitfieldReceived && allPeers.get(i).state.choked == false
+			
+			if (allPeers.get(i).state.hasBitfieldReceived && allPeers.get(i).state.hasHandshakeReceived && allPeers.get(i).state.choked == false
 					&& allPeers.get(i).state.isWaitingForPiece == false) {
-
+				System.out.println("Searching for random Piece");
 				allPeers.get(i).state.isWaitingForPiece = true;
 				int requestedPieceNumber = getRandomPiece(allPeers.get(i));
 				allPeers.get(i).state.pieceNumber = requestedPieceNumber; //Change name to LatestRequestedPiece
-
+				
+				
+				System.out.println("request random piece "+requestedPieceNumber);
 				// Call the method to send the request:
 				if (requestedPieceNumber != -1) {
 					sendRequest(i, requestedPieceNumber);
@@ -313,13 +341,16 @@ public class CurrentClient {
 	}
 
 	private void sendRequest(int index, int pieceNumber) {
+		System.out.println("The piece Number requested is :"+pieceNumber);
 		byte[] pieceMessage = messageBuilder.createRequest(index, pieceNumber);
 		sendMessage(pieceMessage, index);
 	}
 
 	private void sendBitfield(int index) {
+		System.out.println("Sending Bitfield");
 		byte[] bitfieldMessage = messageBuilder.createBitfield(fileManager.bitField);
 		sendMessage(bitfieldMessage, index);
+		System.out.println("Bitfield Sent");
 	}
 
 	// send a message to the output stream
@@ -328,6 +359,7 @@ public class CurrentClient {
 			// stream write the message
 //			comm.out[socketIndex].writeObject(msg);
 //			comm.out[socketIndex].flush();
+			System.out.println("Index sent to : "+socketIndex);
 			comm1.out[socketIndex].writeObject(msg);
 			comm1.out[socketIndex].flush();
 		} catch(IOException e){
