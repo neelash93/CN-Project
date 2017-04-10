@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.TimerTask;
@@ -20,7 +21,7 @@ public class CurrentClient {
 	public MessageBuilder messageBuilder;
 	Log l;
 	Scheduler scheduler;
-	List<Peer> preferredPeers;
+	List<Integer> preferredPeers;
 
 	public CurrentClient(int index, ArrayList<Peer> peers) {
 		this.allPeers = peers;
@@ -40,29 +41,12 @@ public class CurrentClient {
 		}
 
 		if (iteration++ == 1) {
-
 			DeterminePreferredNeighborTask determinePreferredNeighborTask = new DeterminePreferredNeighborTask(this);
 			scheduler.schedule(determinePreferredNeighborTask, prop.unchokingInterval);
 
 			DetermineOptimisticNeighborTask determineOptimisticNeighborTask = new DetermineOptimisticNeighborTask(this);
 			scheduler.schedule(determineOptimisticNeighborTask, prop.optUnchokingInterval);
-
-			/*
-			 * timer1.scheduleAtFixedRate(new TimerTask() {
-			 * 
-			 * @Override public void run(){ determinePreferredNeighbors(); }
-			 * },0, peerProcess.unchokingInterval * 1000);
-			 * 
-			 * timer2.scheduleAtFixedRate(new TimerTask() {
-			 * 
-			 * @Override public void run(){ int temp = optimisticNeighbor;
-			 * optimisticNeighbor = determineOptimisticNeighbor(); if (temp !=
-			 * optimisticNeighbor) logger.info("Peer " + peerId +
-			 * " has the optimistically unchoked neighbor " + optimisticNeighbor
-			 * + '\n'); } },0, peerProcess.optimisticUnchokingInterval * 1000);
-			 */
 		}
-
 	}
 
 	public void setUpConnections() {
@@ -139,8 +123,13 @@ public class CurrentClient {
 		byte[] message = messageBuilder.createUnchoke(index);
 		sendMessage(message, index);
 	}
-	
-	private boolean checkIfNeedPieces(Peer peer) {
+
+	 public void sendChoke(int index) {
+	      byte[] message = messageBuilder.createChoke(index);
+			sendMessage(message, index);
+	 }
+	 
+	public boolean checkIfNeedPieces(Peer peer) {
 		// BigInteger incomingBitfieldInt = new BigInteger(neighbor.bitmap);
 		// BigInteger selfBitfieldInt = new BigInteger(bitfield);
 
@@ -230,122 +219,5 @@ public class CurrentClient {
 			return -1;
 		}
 	}
-	
-    public double calculateDownloadRate(int peer) {
-          return 0;
-      }
 
-	public void determinePreferredNeighbors() {
-		// TODO Auto-generated method stub
-		
-		double[] downloads = new double[neighbors.length]; //Holds original indices for download values
-        double[] temp = new double[neighbors.length]; //Will hold sorted download values
-        double[] topRates = new double[preferredNeighbors.length]; //Will hold top k download values
-        boolean[] chosen = new boolean[neighbors.length]; //Will determine if a neighbor index has been chosen already
-        int topctr = 0; //Used to determine how full preferredNeighbors is
-        int startIndex = 0; //Used to break ties that don't fit into preferredNeighbors
-        int tieLength = 1;
-        int randomIndex;
-
-        List<Double> downloads = new ArrayList<>();
-        
-        for (Peer peer: allPeers) {
-			
-		}
-        
-        for (int i = 0; i < neighbors.length; i++) {
-    		  downloads[i] = calculateDownloadRate(i); //Calculate download rate for all neighbors
-        }
-        
-
-       System.arraycopy(downloads, 0, temp, 0, downloads.length); //Copy the download rates to the temp array
-       Arrays.sort(temp); //Sorts in ascending order, reversed below
-       for (int i = 0; i < temp.length / 2; i++) {
-        double placeholder = temp[i];
-        temp[i] = temp[temp.length - 1 - i];
-        temp[temp.length - 1 - i] = placeholder;
-       }
-
-       topRates = Arrays.copyOfRange(temp,0,preferredNeighbors.length); //Take top k values
-       if ((temp.length > preferredNeighbors.length) && (temp[preferredNeighbors.length-1] == temp[preferredNeighbors.length])) { //If there is a tie that doesn't fit
-         for (int i = preferredNeighbors.length-1; i > 0; i--) { //Determine where it starts
-           if((i != 1) && (temp[i] == temp[i-1])) {
-             startIndex = i-1;
-           }
-           else {
-             break;
-           }
-         }
-
-          for (int i = startIndex; i < temp.length; i++) { //Then determine how long it is
-            if((i != temp.length-1) && (temp[i] == temp[i+1])) {
-              tieLength += 1;
-          }
-        }
-      }
-
-      for (int i = 0; i < preferredNeighbors.length; i++) { //Fill the preferredNeighbors array with proper indices
-        for(int j = 0; j < downloads.length; j++) {
-          if ((tieLength == 1 || i < startIndex) && (topRates[i] == downloads[j]) && !chosen[j]) { //If there wasn't a tie that didn't fit or it hasn't been reached yet
-            preferredNeighbors[i] = j; //And this value is the correct one, take the index of downloads[]
-            chosen[j] = true; //Mark as chosen
-            break;
-          }
-        }
-        if (i >= startIndex && tieLength != 0) { //If there is a tie that doesn't fit and it has been reached
-          while(true) { //Randomly probe for a proper value
-            randomIndex = rng.nextInt(downloads.length); //Select a random integer in the range [0,downloads.length) (TODO: should probably only search from proper downloads values)
-            if(downloads[randomIndex] == topRates[i] && !chosen[randomIndex]) { //If this is the right value and it hasn't been selected yet
-              preferredNeighbors[i] = randomIndex; //Take the index and add it to preferredNeighbors
-              chosen[randomIndex] = true; //Mark as chosen
-              break;
-            }
-          }
-        }
-      }
-     //}
-
-     logger.info("Peer " + peerId + " has the preferred neighbors " + Arrays.toString(preferredNeighbors) + '\n');
-
-     boolean found = false; //Determine whether to send choke or unchoke message
-     for (int i = 0; i < preferredNeighbors.length; i++) { //Loop through all neighbors
-      for (int j = 0; j < neighbors.length; j++) { //Check if neighbor i is preferred or optimistically unchoked
-       if(preferredNeighbors[i] == j) {
-        found = true; //If so, mark true
-        break;
-       }
-     }
-     if (i != ownIndex) {
-       if (found) { //If this neighbor was found
-        sendUnchoke(i); //Unchoke it
-        found = false; //And mark found as false for next neighbor
-       }
-       else
-         sendChoke(i); //Otherwise choke it
-     }
-    }
-
-	}
-
-	public int determineOptimisticNeighbor() {
-
-		// Calculate from the available interested neighbors
-		List<Integer> values = new ArrayList<>();
-
-		for (int i = 0; i < allPeers.size(); i++) {
-			if (allPeers.get(i).state.interested) {
-				values.add(i);
-			}
-		}
-
-		int randomNeighbor = 0;
-
-		// Choose a random neighbor from the list
-		if (values.size() > 0) {
-			randomNeighbor = values.get((int) (Math.random() * values.size()));
-			sendUnchoke(randomNeighbor);
-		}
-
-		return randomNeighbor;
-	}
 }
