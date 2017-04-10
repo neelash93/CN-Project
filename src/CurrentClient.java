@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -19,6 +20,7 @@ public class CurrentClient {
 	public Communication comm;
 	public FileManager fileManager;
 	boolean allFilesReceived;
+	
 	int optimisticNeighbor;
 	public MessageBuilder messageBuilder;
 	Log l;
@@ -44,13 +46,13 @@ public class CurrentClient {
 			setUpConnections();
 			//setup timer
 
-		if (iteration++ == 1) {
-			DeterminePreferredNeighborTask determinePreferredNeighborTask = new DeterminePreferredNeighborTask(this);
-			scheduler.schedule(determinePreferredNeighborTask, prop.unchokingInterval);
+			if (iteration++ == 1) {
+				DeterminePreferredNeighborTask determinePreferredNeighborTask = new DeterminePreferredNeighborTask(this);
+				scheduler.schedule(determinePreferredNeighborTask, prop.unchokingInterval);
 
-			DetermineOptimisticNeighborTask determineOptimisticNeighborTask = new DetermineOptimisticNeighborTask(this);
-			scheduler.schedule(determineOptimisticNeighborTask, prop.optUnchokingInterval);
-		}
+				DetermineOptimisticNeighborTask determineOptimisticNeighborTask = new DetermineOptimisticNeighborTask(this);
+				scheduler.schedule(determineOptimisticNeighborTask, prop.optUnchokingInterval);
+			}
 
 
 			/*
@@ -67,11 +69,11 @@ public class CurrentClient {
 			 * " has the optimistically unchoked neighbor " + optimisticNeighbor
 			 * + '\n'); } },0, peerProcess.optimisticUnchokingInterval * 1000);
 			 */
-
-			}
-
 			processReceivedMessages();
 		}
+			assembleFilePieces();
+	}
+	
 
 	public void processReceivedMessages(){
 		int peerIndex = -1;
@@ -322,6 +324,31 @@ public class CurrentClient {
 		      sendMessage(message, index);
 	    }
 	 
+	   public void assembleFilePieces() {
+	        try {
+	            FileOutputStream os = new FileOutputStream("peer_" + prop.peerId + "//" + prop.fileName);
+	            for (int i = 0; i < prop.numberOfPieces; i++) {
+	                if (i+1 == prop.numberOfPieces)
+	                    os.write(trim(fileManager.fileParts[i]));
+	                else
+	                    os.write(fileManager.fileParts[i]);
+	            }
+	            os.close();
+	        } catch (Exception e) {
+	            //logger.info("Error assembling file pieces");
+	            System.exit(0);
+	       }
+	   }
+	   
+	   public byte[] trim(byte[] data) {
+	        int x = data.length-1;
+	        
+	        while (x >= 0 && data[x] == 0)
+	            --x;
+	        
+	        return Arrays.copyOf(data, x + 1);
+	    }
+	        
 	public boolean checkIfNeedPieces(Peer peer) {
 
 		// BigInteger incomingBitfieldInt = new BigInteger(neighbor.bitmap);

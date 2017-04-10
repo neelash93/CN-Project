@@ -2,7 +2,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.TimerTask;
+import java.util.Comparator;
+
+class PeerWithDownloadRate{
+	int peerId;
+	double downloadRate;
+	public PeerWithDownloadRate(int peerId, double downloadRate) {
+		super();
+		this.peerId = peerId;
+		this.downloadRate = downloadRate;
+	}
+	
+}
+
 
 public class DeterminePreferredNeighborTask extends TimerTask {
 
@@ -21,7 +35,7 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 		// TODO Auto-generated method stub
 
 		List<Peer> allPeers = this.client.allPeers;
-
+/*
 		boolean[] chosen = new boolean[this.client.allPeers.size()];
 
 		int topctr = 0; // Used to determine how full preferredNeighbors is
@@ -29,13 +43,47 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 							// preferredNeighbors
 		int tieLength = 1;
 		int randomIndex;
-
+*/
 		List<Double> downloads = new ArrayList<>();
-
 		for (Peer peer : allPeers) {
 			downloads.add(calculateDownloadRate(peer));
 		}
-
+		
+		PriorityQueue<PeerWithDownloadRate> pq= new PriorityQueue(new Comparator<PeerWithDownloadRate>() {
+			public int compare(PeerWithDownloadRate p1,PeerWithDownloadRate p2) {
+				  return (int)(p1.downloadRate - p2.downloadRate);
+			}
+		});	
+		
+		for(int i=0;i<downloads.size();i++){
+			
+			pq.add(new PeerWithDownloadRate(i, downloads.get(i)));
+		}
+		
+		List<Integer>topDownloadRatePeers = new ArrayList<>();
+		for(int i=0; i < client.prop.prefferedNeighbours; i++) {
+			topDownloadRatePeers.add(pq.remove().peerId);
+		}
+		
+		boolean found = false; // Determine whether to send choke or unchoke message
+		for (int i = 0; i < topDownloadRatePeers.size(); i++) { // Loop through all neighbors
+			for (int j = 0; j < allPeers.size(); j++) { // Check if neighbor i is preferred or optimistically unchoked
+				if (topDownloadRatePeers.get(i)== j) {
+					found = true; // If so, mark true
+					break;
+				}
+			}
+			
+		if (i != this.client.index) {
+			if (found) { // If this neighbor was found
+				this.client.sendUnchoke(i); // Unchoke it
+				found = false; // And mark found as false for next neighbor
+			} else
+				this.client.sendChoke(i); // Otherwise choke it
+			}
+		}
+		
+/*
 		Collections.sort(downloads);
 		Collections.reverse(downloads);
 
@@ -97,16 +145,9 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 					break;
 				}
 			}
-
-			if (i != this.client.index) {
-				if (found) { // If this neighbor was found
-					this.client.sendUnchoke(i); // Unchoke it
-					found = false; // And mark found as false for next neighbor
-				} else
-					this.client.sendChoke(i); // Otherwise choke it
-			}
-		}
-
+*/
+	
+		
 	}
 	
 	public double calculateDownloadRate(Peer peer) {
