@@ -113,8 +113,8 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 		//System.out.println("Calculate download rate: peer, madeConnection, interested, ownIndex: " + neighbors[peer].madeConnection + "," + neighbors[peer].interested);
 	      if (peer.state.hasMadeConnection && peer.state.interested && peer.prop.getOwnIndex() != this.client.prop.getOwnIndex()) { //Check if connection was made and peer is interested
 	        //Calculate download rate
-	        int val = this.client.prop.partsReceived[this.client.prop.getOwnIndex()]/this.client.prop.unchokingInterval;
-	        this.client.prop.partsReceived[this.client.prop.getOwnIndex()] = 0;
+	        int val = this.client.prop.partsRecieved/this.client.prop.unchokingInterval;
+	        this.client.prop.partsRecieved = 0;
 	        return val;
 	      }
 	      else {

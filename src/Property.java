@@ -7,6 +7,7 @@ public class Property {
 	public String hostName;
 	public int port;
 	public boolean hasFile;
+	public int partsRecieved;
 	
 	//Common properties
 	int prefferedNeighbours; 
@@ -70,7 +71,7 @@ public class Property {
 		return numberOfPieces;
 	}
 	public int getIndex(int peerId) {
-		return indexMap.get(peerId);
+		return indexMap.get(String.valueOf(peerId));
 	}
 
 	public int getOwnIndex(){

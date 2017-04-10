@@ -3,18 +3,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.List;
 
 public class Communication {
+	HashMap<Integer,Integer> connectionOrderMap;
 	Server server;
 	Socket requestConn[];           //socket connect to the server      //Can be merged in neighbour     //socket
     ObjectOutputStream out[];         //stream write to the socket		//same							//Socket
-//    ObjectInputStream in[];  
-	
+//    ObjectInputStream in[];
 	
 	public Communication(Property prop, List<Peer> allPeers){
 		server = new Server(prop);   //Listens for Connections
-		
+		connectionOrderMap=new HashMap<>();
 		requestConn = new Socket[prop.indexMap.size()];
 		out = new ObjectOutputStream[prop.indexMap.size()];
 //		in = new ObjectInputStream[prop.indexMap.size()];
@@ -56,5 +57,9 @@ public class Communication {
 		}
 
 
+	}
+
+	public List<Message> getRecievedMessages(){
+		return server.messagesFromPeers;
 	}
 }
