@@ -25,7 +25,7 @@ class ServerListener implements Runnable {
                 try {
                     listenerSocket = new ServerSocket(port);
                     new Thread(new ServerRequestHandler(listenerSocket.accept(), clientIndex , messagesFromPeers)).start();
-//                    System.out.println("Client "  + clientNum + " is connected!");
+                    System.out.println("Client is connected!");
                     clientIndex++;
                 } catch (SocketException e) {
                     Thread.sleep(50);

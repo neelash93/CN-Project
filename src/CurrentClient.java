@@ -34,6 +34,8 @@ public class CurrentClient {
 		comm = new Communication(prop, allPeers);
 		scheduler = new Scheduler();
 		preferredPeers = new ArrayList<>();
+		System.out.println("REACHES BEFORE PROCESS");
+		process();
 	}
 
 	public void process() {
@@ -41,7 +43,6 @@ public class CurrentClient {
 		while (!allFilesReceived) {
 			setUpConnections();
 			//setup timer
-			if (iteration++ == 1) {
 
 		if (iteration++ == 1) {
 			DeterminePreferredNeighborTask determinePreferredNeighborTask = new DeterminePreferredNeighborTask(this);
@@ -71,7 +72,6 @@ public class CurrentClient {
 
 			processReceivedMessages();
 		}
-	}
 
 	public void processReceivedMessages(){
 		int peerIndex = -1;
