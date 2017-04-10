@@ -90,6 +90,8 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 		Collections.reverse(downloads);
 
 		List<Integer> preferredNeighbors = this.client.preferredPeers;
+		for(int i=0;i<preferredSize;i++)
+			preferredNeighbors.add(0);
 		List<Double> topRates = downloads.subList(0, preferredSize);
 
 		if ((downloads.size() > preferredSize)

@@ -17,6 +17,7 @@ enum MessageType {
     public int getValue() {
         return value;
     }
+    
 }
 
 class Message {
@@ -55,8 +56,10 @@ class Message {
         if (hasPayload(type)) {
             this.payload = new byte[length];
             this.payload = payload;
+            System.out.println("Creating Message. Payload length = "+payload.length);
         }
         else {
+        	System.out.println("Payload is null");
             this.payload = null;
         }
 
@@ -82,15 +85,17 @@ class Message {
     }
 
     public byte[] getMessageBytes() {
+    	System.out.println("Reaches getMessageBytes");
         ByteBuffer messageBuffer = ByteBuffer.allocate(5 + length);
 
         messageBuffer.put(messageLength);
-        messageBuffer.putInt(type.getValue());
+        messageBuffer.put((byte)type.getValue());
 
-        if (payload != null) {
+//        if (payload != null) {
+        if(hasPayload(type)){
             messageBuffer.put(payload);
         }
-
+        System.out.println("Exits GetMessage BYtes");
         return messageBuffer.array();
     }
 
