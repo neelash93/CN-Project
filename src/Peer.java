@@ -6,13 +6,6 @@ import java.net.Socket;
 public class Peer {
 	
 	public Property prop;
-	
-	
-	
-//	public Socket requestSocket;
-//    public ObjectOutputStream out;
-//    public ObjectInputStream in;
-//	public byte[] bitmap;
 //	public FileManager file;
 	public PeerState state;
 

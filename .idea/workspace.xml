@@ -2,12 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5b53e934-5d92-4a80-abdd-54c95807d1a8" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/DetermineOptimisticNeighborTask.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/DeterminePreferredNeighborTask.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Log.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Scheduler.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Communication.java" afterPath="$PROJECT_DIR$/src/Communication.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/CurrentClient.java" afterPath="$PROJECT_DIR$/src/CurrentClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/MessageBuilder.java" afterPath="$PROJECT_DIR$/src/MessageBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Property.java" afterPath="$PROJECT_DIR$/src/Property.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Server.java" afterPath="$PROJECT_DIR$/src/Server.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/FileManager.java" afterPath="$PROJECT_DIR$/src/FileManager.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Peer.java" afterPath="$PROJECT_DIR$/src/Peer.java" />
     </list>
     <ignored path="CNProject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -28,14 +30,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="CurrentClient.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CurrentClient.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/CurrentClient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="903">
-              <caret line="92" column="12" lean-forward="true" selection-start-line="92" selection-start-column="12" selection-end-line="92" selection-end-column="12" />
+            <state relative-caret-position="2709">
+              <caret line="129" column="13" lean-forward="true" selection-start-line="129" selection-start-column="13" selection-end-line="129" selection-end-column="13" />
               <folding>
-                <element signature="e#886#895#0" expanded="true" />
+                <element signature="imports" expanded="true" />
+                <element signature="e#2176#2185#0" expanded="true" />
+                <element signature="e#8999#9000#0" expanded="true" />
+                <element signature="e#9027#9028#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DetermineOptimisticNeighborTask.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/DetermineOptimisticNeighborTask.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="42">
+              <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="DeterminePreferredNeighborTask.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/DeterminePreferredNeighborTask.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="42">
+              <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -48,16 +73,6 @@
               <folding>
                 <marker date="1491779482299" expanded="true" signature="1906:2069" ph="{...}" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PeerProcess.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PeerProcess.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="16" column="4" lean-forward="true" selection-start-line="16" selection-start-column="4" selection-end-line="16" selection-end-column="4" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -80,16 +95,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="84">
               <caret line="11" column="7" lean-forward="false" selection-start-line="11" selection-start-column="7" selection-end-line="11" selection-end-column="7" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PeerState.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PeerState.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -122,8 +127,11 @@
         <entry file="file://$PROJECT_DIR$/src/FileManager.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="21">
-              <caret line="24" column="64" lean-forward="true" selection-start-line="24" selection-start-column="64" selection-end-line="24" selection-end-column="64" />
-              <folding />
+              <caret line="21" column="52" lean-forward="true" selection-start-line="21" selection-start-column="52" selection-end-line="21" selection-end-column="52" />
+              <folding>
+                <marker date="1491784212679" expanded="true" signature="930:1365" ph="{...}" />
+                <marker date="1491784212679" expanded="true" signature="1409:1548" ph="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -692,7 +700,10 @@
         <state relative-caret-position="210">
           <caret line="11" column="27" lean-forward="false" selection-start-line="11" selection-start-column="27" selection-end-line="11" selection-end-column="27" />
           <folding>
-            <element signature="e#886#895#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#2176#2185#0" expanded="true" />
+            <element signature="e#8999#9000#0" expanded="true" />
+            <element signature="e#9027#9028#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -795,7 +806,10 @@
         <state relative-caret-position="210">
           <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding>
-            <element signature="e#886#895#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#2176#2185#0" expanded="true" />
+            <element signature="e#8999#9000#0" expanded="true" />
+            <element signature="e#9027#9028#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -899,7 +913,10 @@
         <state relative-caret-position="42">
           <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
           <folding>
-            <element signature="e#886#895#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#2176#2185#0" expanded="true" />
+            <element signature="e#8999#9000#0" expanded="true" />
+            <element signature="e#9027#9028#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1064,8 +1081,11 @@
     <entry file="file://$PROJECT_DIR$/src/FileManager.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="21">
-          <caret line="24" column="64" lean-forward="true" selection-start-line="24" selection-start-column="64" selection-end-line="24" selection-end-column="64" />
-          <folding />
+          <caret line="21" column="52" lean-forward="true" selection-start-line="21" selection-start-column="52" selection-end-line="21" selection-end-column="52" />
+          <folding>
+            <marker date="1491784212679" expanded="true" signature="930:1365" ph="{...}" />
+            <marker date="1491784212679" expanded="true" signature="1409:1548" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1093,11 +1113,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/CurrentClient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="903">
-          <caret line="92" column="12" lean-forward="true" selection-start-line="92" selection-start-column="12" selection-end-line="92" selection-end-column="12" />
+        <state relative-caret-position="2709">
+          <caret line="129" column="13" lean-forward="true" selection-start-line="129" selection-start-column="13" selection-end-line="129" selection-end-column="13" />
           <folding>
-            <element signature="e#886#895#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#2176#2185#0" expanded="true" />
+            <element signature="e#8999#9000#0" expanded="true" />
+            <element signature="e#9027#9028#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/DetermineOptimisticNeighborTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/DeterminePreferredNeighborTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
