@@ -25,6 +25,14 @@
 	    private ObjectInputStream in;   //stream read from the socket
 
 	    private Message message;
+	    private static final HashMap<Integer, MessageType> intToMessageType;
+	    static {
+			intToMessageType = new HashMap<Integer, MessageType>();
+			for (MessageType type : MessageType.values()) {
+				intToMessageType.put(type.getValue(), type);
+			}
+		}
+	    
 	    public ServerListener1(int peerId, String hostName, int portNumber) {
 	        this.peerId = peerId;
 	        this.hostName = hostName;
@@ -86,8 +94,13 @@
 	        //Converts the incoming bytes into the actual Message with its associated clientID
 	        int length = ByteBuffer.allocate(4).put(Arrays.copyOfRange(data, 0, 4)).getInt(0);
 	        byte[] payload = Arrays.copyOfRange(data, 5, data.length);
-	        return new Message(length, MessageType.BITFIELD, payload, clientID); //all bitields received need to change
+	        return new Message(length, fromInt(data[4]), payload, clientID); //all bitields received need to change
 	    }
+	    
+	    public static MessageType fromInt(int i) {
+			MessageType type = intToMessageType.get(Integer.valueOf(i));
+			return type;
+		}
 
 	     /**
 	     * A handler thread class.  Handlers are spawned from the listening

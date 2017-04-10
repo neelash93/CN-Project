@@ -44,8 +44,9 @@ public class CurrentClient {
 		System.out.println("Initialized COmm object");
 		scheduler = new Scheduler();
 		System.out.println("Init scheduler object");
-		preferredPeers = new ArrayList<>();
+		preferredPeers = new ArrayList<>(prop.prefferedNeighbours);
 		System.out.println("REACHES BEFORE PROCESS");
+		messageBuilder = new MessageBuilder();
 		process();
 	}
 
@@ -56,6 +57,7 @@ public class CurrentClient {
 			System.out.println("Reaches After initiating server");
 			int iteration = 0;
 		while (!allFilesReceived) {
+//			System.out.println("Reaches main while loop");
 			setUpConnections();
 			//setup timer
 
@@ -63,6 +65,7 @@ public class CurrentClient {
 			DeterminePreferredNeighborTask determinePreferredNeighborTask = new DeterminePreferredNeighborTask(this);
 			scheduler.schedule(determinePreferredNeighborTask, prop.unchokingInterval);
 
+			
 			DetermineOptimisticNeighborTask determineOptimisticNeighborTask = new DetermineOptimisticNeighborTask(this);
 			scheduler.schedule(determineOptimisticNeighborTask, prop.optUnchokingInterval);
 		}
@@ -83,10 +86,11 @@ public class CurrentClient {
 			 * + '\n'); } },0, peerProcess.optimisticUnchokingInterval * 1000);
 			 */
 
-			}
+//			}
 
 			processReceivedMessages();
 			
+		}
 		}
 //		catch (ConnectException e) {
 //            l.log("Connection refused. You need to initiate a server first.");
@@ -108,6 +112,8 @@ public class CurrentClient {
             //Close connections
         	comm1.closeConnections();
         }
+		System.out.println("DONE WITH EVERYTHING");
+		System.exit(0);
 		}
 
 	public void processReceivedMessages(){
@@ -267,6 +273,7 @@ public class CurrentClient {
 		for (int i = 0; i < allPeers.size(); i++) {
 			if (i != index) {
 				if (!allPeers.get(i).state.hasHandshakeSent && allPeers.get(i).state.hasMadeConnection) {
+					System.out.println("Trying to send HS "+prop.peerId);
 					sendHandShake(i, prop.peerId);
 					allPeers.get(i).state.hasHandshakeSent = true;
 					System.out.println(
@@ -333,6 +340,7 @@ public class CurrentClient {
 	public void sendHandShake(int index, String peerId) {
 		System.out.println("Sending Handshake to "+peerId);
 		byte[] handshake = messageBuilder.createHandshake(Integer.parseInt(peerId));
+		System.out.println("Generates handshake bytes");
 		sendMessage(handshake, index);
 		System.out.println("Sent Handshake");
 	}

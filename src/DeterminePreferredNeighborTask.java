@@ -7,9 +7,11 @@ import java.util.TimerTask;
 public class DeterminePreferredNeighborTask extends TimerTask {
 
 	private CurrentClient client;
+	public int preferredSize;
 
 	public DeterminePreferredNeighborTask(CurrentClient client) {
 		this.client = client;
+		this.preferredSize = client.prop.prefferedNeighbours;
 	}
 
 	@Override
@@ -40,12 +42,12 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 		Collections.reverse(downloads);
 
 		List<Integer> preferredNeighbors = this.client.preferredPeers;
-		List<Double> topRates = downloads.subList(0, preferredNeighbors.size());
+		List<Double> topRates = downloads.subList(0, preferredSize);
 
-		if ((downloads.size() > preferredNeighbors.size())
-				&& (downloads.get(preferredNeighbors.size() - 1) == downloads.get(preferredNeighbors.size()))) { // If
+		if ((downloads.size() > preferredSize)
+				&& (downloads.get(preferredSize - 1) == downloads.get(preferredSize))) { // If
 			// there is a tie that doesn't fit
-			for (int i = preferredNeighbors.size() - 1; i > 0; i--) { // Determine where it starts
+			for (int i =  - 1; i > 0; i--) { // Determine where it starts
 				if ((i != 1) && (downloads.get(i) == downloads.get(i - 1))) {
 					startIndex = i - 1;
 				} else {
@@ -60,7 +62,7 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 			}
 		}
 
-		for (int i = 0; i < preferredNeighbors.size(); i++) { // Fill the preferredNeigh
+		for (int i = 0; i < preferredSize; i++) { // Fill the preferredNeigh
 																// preferredNeighbors
 																// array with
 																// proper
@@ -90,7 +92,7 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 		//logger.info("Peer " + peerId + " has the preferred neighbors " + Arrays.toString(preferredNeighbors) + '\n');
 
 		boolean found = false; // Determine whether to send choke or unchoke message
-		for (int i = 0; i < preferredNeighbors.size(); i++) { // Loop through all neighbors
+		for (int i = 0; i < preferredSize; i++) { // Loop through all neighbors
 			for (int j = 0; j < allPeers.size(); j++) { // Check if neighbor i is preferred or optimistically unchoked
 				if (preferredNeighbors.get(i) == j) {
 					found = true; // If so, mark true
@@ -113,8 +115,8 @@ public class DeterminePreferredNeighborTask extends TimerTask {
 		//System.out.println("Calculate download rate: peer, madeConnection, interested, ownIndex: " + neighbors[peer].madeConnection + "," + neighbors[peer].interested);
 	      if (peer.state.hasMadeConnection && peer.state.interested && peer.prop.getOwnIndex() != this.client.prop.getOwnIndex()) { //Check if connection was made and peer is interested
 	        //Calculate download rate
-	        int val = this.client.prop.partsRecieved/this.client.prop.unchokingInterval;
-	        this.client.prop.partsRecieved = 0;
+	        int val = peer.prop.partsRecieved/this.client.prop.unchokingInterval;
+	        peer.prop.partsRecieved = 0;
 	        return val;
 	      }
 	      else {
