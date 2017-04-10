@@ -379,7 +379,7 @@ public class CurrentClient {
 		      sendMessage(message, index);
 	    }
 	 
-	   public void assembleFilePieces() {
+	   public void assembleFilePieces()  {
 	        try {
 	            FileOutputStream os = new FileOutputStream("peer_" + prop.peerId + "//" + prop.fileName);
 	            for (int i = 0; i < prop.numberOfPieces; i++) {
@@ -433,6 +433,25 @@ public class CurrentClient {
 		}
 
 		return false;
+		/*BigInteger incomingBitfieldInt = new BigInteger(neighbor.bitmap);
+        BigInteger selfBitfieldInt = new BigInteger(bitfield);
+
+        //Check the bits of the bitfield to see if the incoming bitfield has any bits that we don't
+        //Example:
+        //00000010 (own bitfield)
+        //00001111 (incoming bitfield)
+        //AND =
+        //00000010
+        //NOT =
+        //11111101
+        //00001111 (Now we And it with the incoming bitfield again)
+        //AND =
+        //00001101 We should be left with the bits that we dont have
+        //If it is greater than 0 then we need pieces from the sender:
+        if (incomingBitfieldInt.and(selfBitfieldInt.and(incomingBitfieldInt).not()).doubleValue() > 0) {
+            return true;
+        }
+        return false;*/
 		// Check the bits of the bitfield to see if the incoming bitfield has
 		// any bits that we don't
 		// Example:
