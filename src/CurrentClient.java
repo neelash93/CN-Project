@@ -36,8 +36,8 @@ public class CurrentClient {
 		this.allPeers = peers;
 		this.index = index;
 		prop = allPeers.get(index).prop;
-		log = new Log(prop.peerId);
 		fileManager = new FileManager(prop);
+		log = new Log(prop.peerId);
 		comm = new Communication(prop, allPeers);
 		scheduler = new Scheduler();
 		preferredPeers = new ArrayList<>(prop.prefferedNeighbours);
@@ -80,7 +80,6 @@ public class CurrentClient {
 	}
 
 	public void processReceivedMessages() {
-		
 		int peerIndex = -1;
 		List<Message> recievedMessages = comm.getRecievedMessages();
 		List <Message> processedMessages =new ArrayList<Message>();
@@ -117,14 +116,15 @@ public class CurrentClient {
 			allPeers.get(peerIndex).state.hasHandshakeReceived=true;
 		} 
 		else if(msg.getType() == MessageType.BITFIELD) {
-			allPeers.get(peerIndex).state.bitmap=msg.getPayload();
+			allPeers.get(peerIndex).state.bitField=msg.getPayload();
+
 			allPeers.get(peerIndex).state.hasBitfieldReceived=true;
 			if(ifFilePartsNeeded(allPeers.get(peerIndex))) {
 				sendInterested(peerIndex);
 			} else {
 				sendNotInterested(peerIndex);
 			}
-			Log.addLog("Recieved Bitfield from peer "+allPeers.get(peerIndex).prop.peerId+". Bitfield is : "+allPeers.get(peerIndex).state.bitmap);
+			Log.addLog("Recieved Bitfield from peer "+allPeers.get(peerIndex).prop.peerId+". Bitfield is : "+allPeers.get(peerIndex).state.bitField);
 		} 
 		else if(msg.getType() == MessageType.INTERESTED) {
 			allPeers.get(peerIndex).state.interested=true;
@@ -137,12 +137,12 @@ public class CurrentClient {
 		else if(msg.getType() == MessageType.HAVE){
 			int bitIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();
 			
-			BigInteger bits = new BigInteger(allPeers.get(peerIndex).state.bitmap);
+			BigInteger bits = new BigInteger(allPeers.get(peerIndex).state.bitField);
 			bits = bits.setBit(bitIndex);
-			allPeers.get(peerIndex).state.bitmap = bits.toByteArray();
+			allPeers.get(peerIndex).state.bitField = bits.toByteArray();
 
 			boolean peerGetsFile = checkHasFile(bits); 
-			
+		
 			//update allPeers
 			allPeers.get(peerIndex).prop.hasFile = peerGetsFile;
 
@@ -159,23 +159,24 @@ public class CurrentClient {
 		} 
 		else if(msg.getType() == MessageType.PIECE) {
 			//Update File Parts
-			Log.addLog("PIECE : piece to set at - "+allPeers.get(peerIndex).state.pieceNumber);
-			fileManager.fileParts[allPeers.get(peerIndex).state.pieceNumber] = msg.getPayload();
+			Log.addLog("PIECE : piece to set at - "+allPeers.get(peerIndex).state.lastRequestedPart);
+			fileManager.fileParts[allPeers.get(peerIndex).state.lastRequestedPart] = msg.getPayload();
 			allPeers.get(peerIndex).state.isWaitingForPiece = false;
 
 			BigInteger bitsSelf = new BigInteger(fileManager.bitField);
 			Log.addLog("PIECE : Self BitField before "+ bitsSelf);
 
-			bitsSelf = bitsSelf.setBit(allPeers.get(peerIndex).state.pieceNumber);
+			bitsSelf = bitsSelf.setBit(allPeers.get(peerIndex).state.lastRequestedPart);
+
 			Log.addLog("PIECE : Self BitField after "+ bitsSelf);
 
 			allPeers.get(peerIndex).prop.partsRecieved += prop.pieceSize;
 
 			fileManager.bitField = bitsSelf.toByteArray();
 
-			Log.addLog("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.pieceNumber
+			Log.addLog("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.lastRequestedPart
 					+ " from " + allPeers.get(peerIndex).get_peerId() + ". Now the number of pieces it has is " + (++allParts) + "." + '\n');
-			
+
 			//Update peerFileInfo
 			boolean peerGetsFile = checkHasFile(bitsSelf);
 			allPeers.get(prop.getOwnIndex()).prop.hasFile = peerGetsFile; 
@@ -189,16 +190,17 @@ public class CurrentClient {
 			for(Peer p : allPeers){
 				int i = p.prop.getOwnIndex();
 				if(i != index) // or prop.getOwnIndex()
-					sendHave(i,allPeers.get(peerIndex).state.pieceNumber);
+					sendHave(i,allPeers.get(peerIndex).state.lastRequestedPart);
 			}
-			allPeers.get(peerIndex).state.pieceNumber = -1;
+
+			allPeers.get(peerIndex).state.lastRequestedPart = -1;
 
 			for(Peer p : allPeers){
 				int i = p.prop.getOwnIndex();
 				if(i == index) // or prop.getOwnIndex()
 					continue;
 				boolean hasInterest = false;
-				if(allPeers.get(i).state.bitmap != null){
+				if(allPeers.get(i).state.bitField != null){
 					hasInterest = ifFilePartsNeeded(allPeers.get(i));
 				}
 				if(hasInterest == false)
@@ -256,7 +258,7 @@ public class CurrentClient {
 					allPeers.get(i).state.isWaitingForPiece = true;
 					int latestRequestedPiece = generateRandomPart(allPeers.get(i));
 					Log.addLog("Requested Piece Number : "+latestRequestedPiece);
-					allPeers.get(i).state.pieceNumber = latestRequestedPiece; //Change name to LatestRequestedPiece
+					allPeers.get(i).state.lastRequestedPart = latestRequestedPiece; //Change name to LatestRequestedPiece
 
 					if (latestRequestedPiece != -1 && latestRequestedPiece < prop.numberOfPieces) {
 						sendRequest(i, latestRequestedPiece);
@@ -337,8 +339,8 @@ public class CurrentClient {
 	public boolean ifFilePartsNeeded(Peer peer) {
 
 		BitSet incomingbits = new BitSet();
-		for (int i = 0; i < peer.state.bitmap.length * 8; i++) {
-			if ((peer.state.bitmap[peer.state.bitmap.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+		for (int i = 0; i < peer.state.bitField.length * 8; i++) {
+			if ((peer.state.bitField[peer.state.bitField.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
 				incomingbits.set(i);
 			}
 		}
@@ -368,8 +370,8 @@ public class CurrentClient {
 	private int generateRandomPart(Peer peer) {
 
 		BitSet incomingbits = new BitSet();
-		for (int i = 0; i < peer.state.bitmap.length * 8; i++) {
-			if ((peer.state.bitmap[peer.state.bitmap.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+		for (int i = 0; i < peer.state.bitField.length * 8; i++) {
+			if ((peer.state.bitField[peer.state.bitField.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
 				incomingbits.set(i);
 			}
 		}
@@ -383,7 +385,7 @@ public class CurrentClient {
 
 		// to get the interesting incoming set bits
 		incomingbits.andNot(selfbits);
-
+		
 		int j = 0;
 		boolean exists = false;
 		int[] val = new int[incomingbits.length()];
@@ -420,5 +422,4 @@ public class CurrentClient {
 		}
 		return result;
 	}
-
 }

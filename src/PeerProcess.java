@@ -8,10 +8,11 @@ class PeerProcess{
 	
 	public static void main(String args[]) throws FileNotFoundException {
 		peerId = args[0];
-		
+		//Parse Common File
 		Property prop = parseCommonCfg();
+		//Parse Peer's info
 		ArrayList<Peer> peers = parsePeerInfo(prop);
-		System.out.println("Reaches here");
+		//Create current object
 		CurrentClient c = new CurrentClient(Property.indexMap.get(peerId), peers);
 		
 	}
@@ -26,8 +27,8 @@ class PeerProcess{
 				String items[] = line.split("\\s+");
 				prop.indexMap.put(items[0], i++);
 				Property t = new Property(prop);
+				//add Peer respective properties to property object
 				t.addPeerProp(items);
-				System.out.println(t.indexMap+"  "+t.hostName+"   "+t.peerId);
 				Peer p = new Peer(t);
 				peer.add(p);
 				line = cfg.readLine();

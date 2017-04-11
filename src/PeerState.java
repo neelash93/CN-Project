@@ -1,27 +1,26 @@
-/**
- * Created by Prateek
- */
 public class PeerState {
-    public byte[] bitmap;
-
+	//All Peers file state
+    public byte[] bitField;
+    
+    //All Peers connection status
     public boolean choked;
     public boolean interested;
 
-    public boolean isWaitingForPiece;
-    public boolean hasConnectionRefused ;
-    public boolean hasBitfieldReceived ;
-    public boolean hasHandshakeSent ;
-    public boolean hasHandshakeReceived ;
-    public boolean hasFile ;
-    public boolean hasBitfieldSent ;
+    public boolean hasBitfieldReceived;
+    public boolean hasBitfieldSent;
+    
+    public boolean hasHandshakeSent;
+    public boolean hasHandshakeReceived;
+    
     public boolean hasMadeConnection;
-
-    public int pieceNumber ;
+    public boolean hasConnectionRefused;
+    
+    //Peer's Piece Information
+    public int lastRequestedPart;
+    public boolean isWaitingForPiece;
 
     public PeerState() {
-        this.pieceNumber=-1;
+        this.lastRequestedPart=-1;
         this.choked=true;
-
     }
-
 }
