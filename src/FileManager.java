@@ -13,31 +13,35 @@ public class FileManager {
 	public FileManager(Property prop){
 		this.prop = prop;
 		this.totalBytes = (int)Math.ceil((double)prop.numberOfPieces/8);
-		System.out.println("Total bytes = "+totalBytes+"   number o Pieces = "+prop.numberOfPieces);
 		bitField = new byte[totalBytes+1];
 		fileParts = new byte[prop.numberOfPieces][prop.pieceSize];
 		if(prop.hasFile){
-			BigInteger temp = new BigInteger("0");
-			for(int i=0;i<prop.numberOfPieces;i++)
-				temp = temp.setBit(i);
-			bitField = temp.toByteArray();
-//			Arrays.fill( bitField, (byte) 256 );
+//			BigInteger temp = new BigInteger("0");
+//			for(int i=0;i<prop.numberOfPieces;i++)
+//				temp = temp.setBit(i);
+			int tempNum = 0;
+			for(int i=bitField.length-1;i>=0;i--){
+				for(int j=0;j<=7;j++){
+					if(tempNum++ < prop.numberOfPieces)
+						bitField[i] |= 1<<j;
+					else break;
+				}
+				if(tempNum >= prop.numberOfPieces) break;
+			}
+//			bitField = temp.toByteArray();
 			try{
 				File file = new File("peer_" + prop.peerId + "\\" + prop.fileName);
 	    	 	FileInputStream inputStream = new FileInputStream(file);
 				for(int i=0;i<fileParts.length;i++){
-					inputStream.read(fileParts[i++]);  //Check with a huge file. Out of memory errors
+					inputStream.read(fileParts[i++]);
 				}
 //				testFile();
-				
 			}
 			catch(Exception e){
 				e.printStackTrace();
 				System.out.println("Error Getting File");
 			}
 		}
-		
-		System.out.println("Bitfield after creation : "+new BigInteger(bitField));
 	}
 	
 	public void testFile(){
@@ -45,10 +49,7 @@ public class FileManager {
 			File f = new File("peer_"+prop.peerId+"\\temp.txt");
 			FileOutputStream os = new FileOutputStream(f);
 			for (int i = 0; i < prop.numberOfPieces; i++) {
-                if (i+1 == prop.numberOfPieces)
-                    os.write(trim(fileParts[i]));
-                else
-                    os.write(fileParts[i]);
+                os.write(fileParts[i]);
             }
 			os.close();
 		}
@@ -56,13 +57,4 @@ public class FileManager {
 			System.out.println("Error writing File");
 		}
 	}
-	
-	private static byte[] trim(byte[] data) {
-        int x = data.length-1;
-
-        while (x >= 0 && data[x] == 0)
-            --x;
-
-        return Arrays.copyOf(data, x + 1);
-    }
 }
