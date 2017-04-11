@@ -56,7 +56,6 @@ class Message {
         if (hasPayload(type)) {
             this.payload = new byte[length];
             this.payload = payload;
-            System.out.println("Creating Message. Payload length = "+payload.length);
         }
         else {
         	System.out.println("Payload is null");
@@ -85,7 +84,6 @@ class Message {
     }
 
     public byte[] getMessageBytes() {
-    	System.out.println("Reaches getMessageBytes");
         ByteBuffer messageBuffer = ByteBuffer.allocate(5 + length);
 
         messageBuffer.put(messageLength);
@@ -95,7 +93,6 @@ class Message {
         if(hasPayload(type)){
             messageBuffer.put(payload);
         }
-        System.out.println("Exits GetMessage BYtes");
         return messageBuffer.array();
     }
 

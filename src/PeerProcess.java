@@ -11,6 +11,7 @@ class PeerProcess{
 		
 		Property prop = parseCommonCfg();
 		ArrayList<Peer> peers = parsePeerInfo(prop);
+		System.out.println("Reaches here");
 		CurrentClient c = new CurrentClient(Property.indexMap.get(peerId), peers);
 		
 	}
@@ -26,6 +27,7 @@ class PeerProcess{
 				prop.indexMap.put(items[0], i++);
 				Property t = new Property(prop);
 				t.addPeerProp(items);
+				System.out.println(t.indexMap+"  "+t.hostName+"   "+t.peerId);
 				Peer p = new Peer(t);
 				peer.add(p);
 				line = cfg.readLine();
@@ -46,7 +48,6 @@ class PeerProcess{
 			String[] arr = new String[6];
 			int i=0;
 			while(line != null && !line.equals("")){
-				System.out.println(line + "  "+i);
 				arr[i++] = line.split("\\s+")[1];
 				line = comm.readLine();
 			}
@@ -59,13 +60,6 @@ class PeerProcess{
 		return null;
 	}
 	
-	private HashMap<String,Thread>requestPool=new HashMap<>();
-
-	Server server;
-	PeerProcess(String ipAddress,String port,String peerName){
-
-
-	}
 	
 
 }
