@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.ConnectException;
@@ -28,24 +29,20 @@ public class CurrentClient {
 	Log l;
 	Scheduler scheduler;
 	List<Integer> preferredPeers;
-
+	static int counter_test = 0;
+	int total=0;
 	public CurrentClient(int index, ArrayList<Peer> peers) {
 		this.allPeers = peers;
 		this.index = index;
 		prop = allPeers.get(index).prop;
 		l = new Log(prop.peerId);
-		System.out.println("Initiliazed log object in current Client");
 		fileManager = new FileManager(prop);
-		System.out.println("Initialized fileManager object in CuurentClient");
 		//Trying to use new Communication specifics everywhere instead of old comm object
 //		comm = new Communication(prop, allPeers);
 		comm1 = new Communication(prop, allPeers);
 		
-		System.out.println("Initialized COmm object");
 		scheduler = new Scheduler();
-		System.out.println("Init scheduler object");
 		preferredPeers = new ArrayList<>(prop.prefferedNeighbours);
-		System.out.println("REACHES BEFORE PROCESS");
 		messageBuilder = new MessageBuilder();
 		process();
 	}
@@ -87,7 +84,7 @@ public class CurrentClient {
 			 */
 
 //			}
-
+		
 			processReceivedMessages();
 			
 		}
@@ -236,10 +233,16 @@ public class CurrentClient {
 			//Update FileParts
 			fileManager.fileParts[allPeers.get(peerIndex).state.pieceNumber] = msg.getPayload();
 			BigInteger bitsSelf = new BigInteger(fileManager.bitField);
-			bitsSelf.setBit(allPeers.get(peerIndex).state.pieceNumber);
-			allPeers.get(peerIndex).prop.partsRecieved += prop.pieceSize;
 			allPeers.get(peerIndex).state.isWaitingForPiece = false;
 			
+			bitsSelf.setBit(allPeers.get(peerIndex).state.pieceNumber);
+			allPeers.get(peerIndex).prop.partsRecieved += prop.pieceSize;
+			
+			fileManager.bitField = bitsSelf.toByteArray();
+			System.out.println("****Updated bitfield"+new BigInteger(fileManager.bitField));
+			
+			l.log("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.pieceNumber
+            + " from " + allPeers.get(peerIndex).get_peerId() + ". Now the number of pieces it has is " + (++total) + "." + '\n');
 			//Update peerFileInfo
 			boolean peerGetsFile = checkHasFile(bitsSelf);
 			allPeers.get(prop.getOwnIndex()).prop.hasFile = peerGetsFile; //Could also do prop.hasFile = ... But could conflict if same prop object is not passed to CurrClient and allPeers.get(ownIndex)
@@ -287,6 +290,11 @@ public class CurrentClient {
 		}
 		else if(msg.getType() == MessageType.UNCHOKE){
 			allPeers.get(peerIndex).state.choked = false;
+			System.out.println("Recieved Unchoke" + counter_test);
+			if(counter_test++ > 5){
+				assembleFilePieces();
+				System.exit(0);
+			}
 		}
 		else l.log("Illegal Message Type Found : " + msg.getType());
 		
@@ -327,10 +335,10 @@ public class CurrentClient {
 				System.out.println("Searching for random Piece");
 				allPeers.get(i).state.isWaitingForPiece = true;
 				int requestedPieceNumber = getRandomPiece(allPeers.get(i));
+				l.log("Requested Piece Number : "+requestedPieceNumber);
 				allPeers.get(i).state.pieceNumber = requestedPieceNumber; //Change name to LatestRequestedPiece
 				
 				
-				System.out.println("request random piece "+requestedPieceNumber);
 				// Call the method to send the request:
 				if (requestedPieceNumber != -1) {
 					sendRequest(i, requestedPieceNumber);
@@ -378,14 +386,22 @@ public class CurrentClient {
 	}
 
 	public void sendUnchoke(int index) {
+		counter_test++;
 		System.out.println("Sending unchoke");
+		System.out.println("bwitfield"+new BigInteger(fileManager.bitField));
 		// Send a choke message to non-preferred peers
 		byte[] message = messageBuilder.createUnchoke(index);
 		sendMessage(message, index);
-		System.out.println("Sent Unchoke");
+		System.out.println("Sent Unchoke" + counter_test);
+		if(counter_test > 5){
+			assembleFilePieces();
+			System.exit(0);
+		}
+		
 	}
 
 	 public void sendChoke(int index) {
+		 
 	      byte[] message = messageBuilder.createChoke(index);
 			sendMessage(message, index);
 	 }
@@ -519,5 +535,30 @@ public class CurrentClient {
 		}
 		return true;
 	}
+	
+	public void assembleFilePieces()  {
+        try {
+            FileOutputStream os = new FileOutputStream("peer_" + prop.peerId + "//" + prop.fileName);
+            for (int i = 0; i < prop.numberOfPieces; i++) {
+                if (i+1 == prop.numberOfPieces)
+                    os.write(trim(fileManager.fileParts[i]));
+                else
+                    os.write(fileManager.fileParts[i]);
+            }
+            os.close();
+        } catch (Exception e) {
+            //logger.info("Error assembling file pieces");
+            System.exit(0);
+       }
+   }
+   
+   public byte[] trim(byte[] data) {
+        int x = data.length-1;
+        
+        while (x >= 0 && data[x] == 0)
+            --x;
+        
+        return Arrays.copyOf(data, x + 1);
+    }
 
 }
