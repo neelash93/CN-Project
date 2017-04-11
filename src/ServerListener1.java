@@ -55,9 +55,7 @@
 	                while (true) {
 	                    try {
 	                        listener = new ServerSocket(portNumber);
-	                        System.out.println("Handler is Called");
 	                        new Handler(listener.accept(),clientNum).start();
-	                        System.out.println("Client "  + clientNum + " is connected!");
 	                        clientNum++;
 	                    } catch (SocketException e) {
 	                        Thread.sleep(50);
@@ -74,7 +72,6 @@
 
 	    private Message convertToMessage(byte[] data, int clientID) {
 	        //Check for handshake:
-	    	System.out.println("Reaches ConvertToMessage");
 	        try {
 	            Thread.sleep(1);
 	        } catch (Exception e) {
@@ -121,20 +118,17 @@
 	            try{
 	            	
 	                //initialize Input and Output streams
-	            	System.out.println("Handler is run");
 	                in = new ObjectInputStream(connection.getInputStream());
 
 	                try{
 
 	                    while(true)
 	                    {
-	                    	System.out.println("Reaches wwhile loop of ServerListener1");
 	                        //receive the message sent from the client
 	                        byte[] temp = (byte[])in.readObject();
 	                        /*for (int i = 0; i < temp.length; i++) {
 	                            System.out.println(i + " : " + temp[i]);
 	                        }*/
-	                        System.out.println("Just before ConvertToMessage");
 	                        message = convertToMessage(temp, clientID);
 	                        //System.out.println("Placing message in array: " + message.toString());
 

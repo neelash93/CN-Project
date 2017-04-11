@@ -73,7 +73,6 @@ public class Communication {
 	public void startServer(int peerId, String hostName, int port){
 		serverListener = new ServerListener1(peerId, hostName, port);
 		
-		System.out.println("Entering Init COnnections");
         int connectionsLeft = allPeers.size()-1;
             while (connectionsLeft > 0) {
                 System.out.println();
@@ -121,7 +120,6 @@ public class Communication {
                 }
             }
             
-            System.out.println("all Connections have been established");
 		}
 
 //		if(connectedPeers!=prop.indexMap.size()){

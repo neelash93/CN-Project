@@ -17,7 +17,11 @@ public class FileManager {
 		bitField = new byte[totalBytes+1];
 		fileParts = new byte[prop.numberOfPieces][prop.pieceSize];
 		if(prop.hasFile){
-			Arrays.fill( bitField, (byte) 1 );
+			BigInteger temp = new BigInteger("0");
+			for(int i=0;i<prop.numberOfPieces;i++)
+				temp = temp.setBit(i);
+			bitField = temp.toByteArray();
+//			Arrays.fill( bitField, (byte) 256 );
 			try{
 				File file = new File("peer_" + prop.peerId + "\\" + prop.fileName);
 	    	 	FileInputStream inputStream = new FileInputStream(file);
