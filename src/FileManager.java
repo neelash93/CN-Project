@@ -1,17 +1,19 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 public class FileManager {
-	byte[] bitField;
-	int totalBytes;
-	Property prop;
+	public byte[] bitField;
+	public int totalBytes;
+	public Property prop;
 	byte[][] fileParts;
 	
 	public FileManager(Property prop){
 		this.prop = prop;
 		this.totalBytes = (int)Math.ceil((double)prop.numberOfPieces/8);
+		System.out.println("Total bytes = "+totalBytes+"   number o Pieces = "+prop.numberOfPieces);
 		bitField = new byte[totalBytes+1];
 		fileParts = new byte[prop.numberOfPieces][prop.pieceSize];
 		if(prop.hasFile){
@@ -30,6 +32,8 @@ public class FileManager {
 				System.out.println("Error Getting File");
 			}
 		}
+		
+		System.out.println("Bitfield after creation : "+new BigInteger(bitField));
 	}
 	
 	public void testFile(){

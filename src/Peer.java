@@ -29,13 +29,13 @@ public class Peer {
 		return prop.port;
 	}
 	
-	public void initialize(){
+	public void initialize() {
 //		file = new FileManager(prop);
 		state = new PeerState();
 		
 	}
 	
-	public void createPeerDir(){
+	public void createPeerDir() {
 		String dirName = "peer_"+prop.peerId;
 		String currDir = System.getProperty("user.dir");
 		File newDir = new File(currDir+"//"+dirName);
