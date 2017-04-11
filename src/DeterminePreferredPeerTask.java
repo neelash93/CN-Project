@@ -58,7 +58,11 @@ public class DeterminePreferredPeerTask extends TimerTask {
 			topDownloadRatePeers.add(priorityQueue.remove().peerId);
 		}
 
-		Log.addLog("Peer " + client.prop.peerId + " has the preferred neighbors " + Arrays.toString(topDownloadRatePeers.toArray()) + '\n');
+		String str = "";
+		for(int i=0; i < topDownloadRatePeers.size(); i++) {
+			str += client.prop.getIndex(topDownloadRatePeers.get(i)) +",";
+		}
+		Log.addLog("Peer " + client.prop.peerId + " has the preferred neighbors " + str + "." + '\n');
 		
 		// to check whether to send choke or unchoke message
 		boolean exists = false;
