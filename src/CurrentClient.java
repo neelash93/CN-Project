@@ -25,7 +25,6 @@ public class CurrentClient {
 	public static Communication comm1;
 	public FileManager fileManager;
 	boolean allFilesReceived;
-	
 	int optimisticNeighbor;
 	public MessageBuilder messageBuilder;
 	Log l;
@@ -37,8 +36,8 @@ public class CurrentClient {
 		this.allPeers = peers;
 		this.index = index;
 		prop = allPeers.get(index).prop;
-		l = new Log(prop.peerId);
 		fileManager = new FileManager(prop);
+		l = new Log(prop.peerId);
 		//Trying to use new Communication specifics everywhere instead of old comm object
 //		comm = new Communication(prop, allPeers);
 		comm1 = new Communication(prop, allPeers);
@@ -55,18 +54,19 @@ public class CurrentClient {
 			comm1.startServer(Integer.parseInt(prop.peerId), prop.hostName, prop.port);
 			comm1.initOPStreams();
 			int iteration = 0;
-			while (!allFilesReceived) {
-//				System.out.println("Reaches main while loop");
-				setUpConnections();
-				//setup timer
+		while (!allFilesReceived) {
+//			System.out.println("Reaches main while loop");
+			setUpConnections();
+			//setup timer
 
-				if (iteration++ == 1) {
-					DeterminePreferredPeerTask determinePreferredPeerTask = new DeterminePreferredPeerTask(this);
-					scheduler.schedule(determinePreferredPeerTask, prop.unchokingInterval);
-			
-					DetermineOptimisticPeerTask determineOptimisticPeerTask = new DetermineOptimisticPeerTask(this);
-					scheduler.schedule(determineOptimisticPeerTask, prop.optUnchokingInterval);
-				}
+			if (iteration++ == 1) {
+				DeterminePreferredPeerTask determinePreferredPeerTask = new DeterminePreferredPeerTask(this);
+				scheduler.schedule(determinePreferredPeerTask, prop.unchokingInterval);
+		
+				DetermineOptimisticPeerTask determineOptimisticPeerTask = new DetermineOptimisticPeerTask(this);
+				scheduler.schedule(determineOptimisticPeerTask, prop.optUnchokingInterval);
+			}
+
 
 
 			/*
@@ -89,7 +89,6 @@ public class CurrentClient {
 			processReceivedMessages();
 			
 		}
-
 		}
 //		catch (ConnectException e) {
 //            Log.addLog("Connection refused. You need to initiate a server first.");
@@ -107,7 +106,6 @@ public class CurrentClient {
         //catch (InterruptedException e) {
             //System.err.println("Interrupted thread execution.");
         //}
-
         finally {
             //Close connections
         	comm1.closeConnections();
@@ -115,9 +113,7 @@ public class CurrentClient {
 		System.out.println("DONE WITH EVERYTHING. Next step assemble File");
 		assembleFilePieces();
 		System.exit(0);
-		assembleFilePieces();
-	}
-
+		}
 
 	public void processReceivedMessages(){
 		int peerIndex = -1;
@@ -174,14 +170,14 @@ public class CurrentClient {
 			allPeers.get(peerIndex).state.hasHandshakeReceived=true;
 		}
 		else if(msg.getType()==MessageType.BITFIELD){
-			allPeers.get(peerIndex).state.bitmap=msg.getPayload();
+			allPeers.get(peerIndex).state.bitField=msg.getPayload();
 			allPeers.get(peerIndex).state.hasBitfieldReceived=true;
 			if(checkIfNeedPieces(allPeers.get(peerIndex))){
 				sendInterested(peerIndex);
 			}else{
 				sendNotInterested(peerIndex);
 			}
-			Log.addLog("Recieved Bitfield from peer "+allPeers.get(peerIndex).prop.peerId+". Bitfield is : "+allPeers.get(peerIndex).state.bitmap);
+			Log.addLog("Recieved Bitfield from peer "+allPeers.get(peerIndex).prop.peerId+". Bitfield is : "+allPeers.get(peerIndex).state.bitField);
 		}
 		else if(msg.getType()==MessageType.INTERESTED){
 			allPeers.get(peerIndex).state.interested=true;
@@ -202,9 +198,9 @@ public class CurrentClient {
 			 int bitIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();
 			 
 			 
-			 BigInteger bits = new BigInteger(allPeers.get(peerIndex).state.bitmap);
+			 BigInteger bits = new BigInteger(allPeers.get(peerIndex).state.bitField);
 			 bits = bits.setBit(bitIndex);
-			 allPeers.get(peerIndex).state.bitmap = bits.toByteArray();
+			 allPeers.get(peerIndex).state.bitField = bits.toByteArray();
 			 
 			 boolean peerGetsFile = checkHasFile(bits); //Seperated into function as its used in other places as well.
 			 
@@ -236,14 +232,14 @@ public class CurrentClient {
 		}
 		else if(msg.getType() == MessageType.PIECE){
 			//Update FileParts
-			Log.addLog("PIECE : piece to set at - "+allPeers.get(peerIndex).state.pieceNumber);
-			fileManager.fileParts[allPeers.get(peerIndex).state.pieceNumber] = msg.getPayload();
+			Log.addLog("PIECE : piece to set at - "+allPeers.get(peerIndex).state.lastRequestedPart);
+			fileManager.fileParts[allPeers.get(peerIndex).state.lastRequestedPart] = msg.getPayload();
 			allPeers.get(peerIndex).state.isWaitingForPiece = false;
 			
 			BigInteger bitsSelf = new BigInteger(fileManager.bitField);
 			Log.addLog("PIECE : Self BitField before "+ bitsSelf);
 			
-			bitsSelf = bitsSelf.setBit(allPeers.get(peerIndex).state.pieceNumber);
+			bitsSelf = bitsSelf.setBit(allPeers.get(peerIndex).state.lastRequestedPart);
 			Log.addLog("PIECE : Self BitField after "+ bitsSelf);
 			
 			allPeers.get(peerIndex).prop.partsRecieved += prop.pieceSize;
@@ -251,7 +247,7 @@ public class CurrentClient {
 			fileManager.bitField = bitsSelf.toByteArray();
 			System.out.println("****Updated bitfield"+new BigInteger(fileManager.bitField));
 			
-			Log.addLog("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.pieceNumber
+			Log.addLog("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.lastRequestedPart
             + " from " + allPeers.get(peerIndex).get_peerId() + ". Now the number of pieces it has is " + (++total) + "." + '\n');
 			//Update peerFileInfo
 			boolean peerGetsFile = checkHasFile(bitsSelf);
@@ -264,9 +260,9 @@ public class CurrentClient {
 			for(Peer p : allPeers){
 				int i = p.prop.getOwnIndex();
 				if(i != index) // or prop.getOwnIndex()
-					sendHave(i,allPeers.get(peerIndex).state.pieceNumber);
+					sendHave(i,allPeers.get(peerIndex).state.lastRequestedPart);
 			}
-			allPeers.get(peerIndex).state.pieceNumber = -1;
+			allPeers.get(peerIndex).state.lastRequestedPart = -1;
 			
 			
 			for(Peer p : allPeers){
@@ -274,7 +270,7 @@ public class CurrentClient {
 				if(i == index) // or prop.getOwnIndex()
 					continue;
 				boolean hasInterest = false;
-				if(allPeers.get(i).state.bitmap != null){
+				if(allPeers.get(i).state.bitField != null){
 					hasInterest = checkIfNeedPieces(allPeers.get(i));
 				}
 				if(hasInterest == false)
@@ -346,7 +342,7 @@ public class CurrentClient {
 				allPeers.get(i).state.isWaitingForPiece = true;
 				int requestedPieceNumber = getRandomPiece(allPeers.get(i));
 				Log.addLog("Requested Piece Number : "+requestedPieceNumber);
-				allPeers.get(i).state.pieceNumber = requestedPieceNumber; //Change name to LatestRequestedPiece
+				allPeers.get(i).state.lastRequestedPart = requestedPieceNumber; //Change name to LatestRequestedPiece
 				
 				
 				// Call the method to send the request:
@@ -358,9 +354,8 @@ public class CurrentClient {
 			}
 		  }
 		}
-		}
 
-	
+	}
 
 	private void sendRequest(int index, int pieceNumber) {
 		byte[] pieceMessage = messageBuilder.createRequest(index, pieceNumber);
@@ -433,31 +428,6 @@ public class CurrentClient {
 		      sendMessage(message, index);
 	    }
 	 
-	   public void assembleFilePieces()  {
-	        try {
-	            FileOutputStream os = new FileOutputStream("peer_" + prop.peerId + "//" + prop.fileName);
-	            for (int i = 0; i < prop.numberOfPieces; i++) {
-	                if (i+1 == prop.numberOfPieces)
-	                    os.write(trim(fileManager.fileParts[i]));
-	                else
-	                    os.write(fileManager.fileParts[i]);
-	            }
-	            os.close();
-	        } catch (Exception e) {
-	            //logger.info("Error assembling file pieces");
-	            System.exit(0);
-	       }
-	   }
-	   
-	   public byte[] trim(byte[] data) {
-	        int x = data.length-1;
-	        
-	        while (x >= 0 && data[x] == 0)
-	            --x;
-	        
-	        return Arrays.copyOf(data, x + 1);
-	    }
-	        
 	public boolean checkIfNeedPieces(Peer peer) {
 
 //		 BigInteger incomingBitfieldInt = new BigInteger(peer.state.bitmap);
@@ -466,8 +436,8 @@ public class CurrentClient {
 //			 return true;
 //	        }
 		BitSet incomingbits = new BitSet();
-		for (int i = 0; i < peer.state.bitmap.length * 8; i++) {
-			if ((peer.state.bitmap[peer.state.bitmap.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+		for (int i = 0; i < peer.state.bitField.length * 8; i++) {
+			if ((peer.state.bitField[peer.state.bitField.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
 				incomingbits.set(i);
 			}
 		}
@@ -489,25 +459,6 @@ public class CurrentClient {
 		}
 
 		return false;
-		/*BigInteger incomingBitfieldInt = new BigInteger(neighbor.bitmap);
-        BigInteger selfBitfieldInt = new BigInteger(bitfield);
-
-        //Check the bits of the bitfield to see if the incoming bitfield has any bits that we don't
-        //Example:
-        //00000010 (own bitfield)
-        //00001111 (incoming bitfield)
-        //AND =
-        //00000010
-        //NOT =
-        //11111101
-        //00001111 (Now we And it with the incoming bitfield again)
-        //AND =
-        //00001101 We should be left with the bits that we dont have
-        //If it is greater than 0 then we need pieces from the sender:
-        if (incomingBitfieldInt.and(selfBitfieldInt.and(incomingBitfieldInt).not()).doubleValue() > 0) {
-            return true;
-        }
-        return false;*/
 		// Check the bits of the bitfield to see if the incoming bitfield has
 		// any bits that we don't
 		// Example:
@@ -562,8 +513,8 @@ public class CurrentClient {
 		 
 		 
 		BitSet incomingbits = new BitSet();
-		for (int i = 0; i < peer.state.bitmap.length * 8; i++) {
-			if ((peer.state.bitmap[peer.state.bitmap.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
+		for (int i = 0; i < peer.state.bitField.length * 8; i++) {
+			if ((peer.state.bitField[peer.state.bitField.length - i / 8 - 1] & (1 << (i % 8))) > 0) {
 				incomingbits.set(i);
 			}
 		}
@@ -576,7 +527,6 @@ public class CurrentClient {
 		}
 
 		incomingbits.andNot(selfbits);
-		
 		int j = 0;
 		boolean exists = false;
 		int[] val = new int[incomingbits.length()];
@@ -617,5 +567,30 @@ public class CurrentClient {
 		}
 		return result;
 	}
+	
+	public void assembleFilePieces()  {
+        try {
+            FileOutputStream os = new FileOutputStream("peer_" + prop.peerId + "//" + prop.fileName);
+            for (int i = 0; i < prop.numberOfPieces; i++) {
+//                if (i+1 == prop.numberOfPieces)
+//                    os.write(trim(fileManager.fileParts[i]));
+//                else
+                    os.write(fileManager.fileParts[i]);
+            }
+            os.close();
+        } catch (Exception e) {
+            //logger.info("Error assembling file pieces");
+            System.exit(0);
+       }
+   }
+   
+   public byte[] trim(byte[] data) {
+        int x = data.length-1;
+        
+        while (x >= 0 && data[x] == 0)
+            --x;
+        
+        return Arrays.copyOf(data, x + 1);
+    }
 
 }

@@ -75,16 +75,12 @@ public class Property {
 	}
 
 	public int getOwnIndex(){
-//		System.out.println(indexMap);
-		
 		return indexMap.get(peerId);
-		
 	}
 	
+	//Add Peer respective properties
 	public void addPeerProp(String arr[]){
-//		System.out.println("before"+this.peerId);
 		this.peerId = arr[0];
-//		System.out.println("after"+this.peerId);
 		this.hostName = arr[1];
 		this.port = Integer.parseInt(arr[2]);
 		this.hasFile = arr[3].equals("1") ? true : false;
