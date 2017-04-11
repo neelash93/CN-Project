@@ -1,0 +1,113 @@
+06:17:33.622 - [INFO] - Peer 1002 is connected from Peer 1001
+
+06:17:33.636 - [INFO] - Peer 1002 has the preferred neighbors [0]
+
+06:17:34.879 - [INFO] - Sent bitfield to host 10.0.0.36on port 8001
+
+06:17:34.881 - [INFO] - Recieved Bitfield from peer 1001. Bitfield is : [B@330bedb4
+06:17:34.936 - [INFO] - Recieved UnInterested Message from peer 1001
+06:17:38.633 - [INFO] - Peer 1002 has the preferred neighbors [0]
+
+06:17:43.634 - [INFO] - Peer 1002 has the preferred neighbors [0]
+
+06:17:48.634 - [INFO] - Peer 1002 has the preferred neighbors [0]
+
+06:17:49.826 - [INFO] - Peer 1002 is unchoked by  1001
+
+06:17:49.827 - [INFO] - Requested Piece Number : 7
+06:17:49.903 - [INFO] - PIECE : piece to set at - 7
+06:17:49.905 - [INFO] - PIECE : Self BitField before 0
+06:17:49.907 - [INFO] - PIECE : Self BitField after 128
+06:17:49.908 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 7 from 1001. Now the number of pieces it has is 1.
+
+06:17:49.909 - [INFO] - Requested Piece Number : 4
+06:17:50.043 - [INFO] - PIECE : piece to set at - 4
+06:17:50.044 - [INFO] - PIECE : Self BitField before 128
+06:17:50.044 - [INFO] - PIECE : Self BitField after 144
+06:17:50.045 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 4 from 1001. Now the number of pieces it has is 2.
+
+06:17:50.046 - [INFO] - Requested Piece Number : 13
+06:17:50.138 - [INFO] - PIECE : piece to set at - 13
+06:17:50.139 - [INFO] - PIECE : Self BitField before 144
+06:17:50.140 - [INFO] - PIECE : Self BitField after 8336
+06:17:50.141 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 13 from 1001. Now the number of pieces it has is 3.
+
+06:17:50.142 - [INFO] - Requested Piece Number : 12
+06:17:50.198 - [INFO] - PIECE : piece to set at - 12
+06:17:50.199 - [INFO] - PIECE : Self BitField before 8336
+06:17:50.199 - [INFO] - PIECE : Self BitField after 12432
+06:17:50.200 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 12 from 1001. Now the number of pieces it has is 4.
+
+06:17:50.202 - [INFO] - Requested Piece Number : 9
+06:17:50.262 - [INFO] - PIECE : piece to set at - 9
+06:17:50.263 - [INFO] - PIECE : Self BitField before 12432
+06:17:50.264 - [INFO] - PIECE : Self BitField after 12944
+06:17:50.264 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 9 from 1001. Now the number of pieces it has is 5.
+
+06:17:50.266 - [INFO] - Requested Piece Number : 6
+06:17:50.426 - [INFO] - PIECE : piece to set at - 6
+06:17:50.427 - [INFO] - PIECE : Self BitField before 12944
+06:17:50.428 - [INFO] - PIECE : Self BitField after 13008
+06:17:50.429 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 6 from 1001. Now the number of pieces it has is 6.
+
+06:17:50.430 - [INFO] - Requested Piece Number : 14
+06:17:50.550 - [INFO] - PIECE : piece to set at - 14
+06:17:50.550 - [INFO] - PIECE : Self BitField before 13008
+06:17:50.551 - [INFO] - PIECE : Self BitField after 29392
+06:17:50.551 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 14 from 1001. Now the number of pieces it has is 7.
+
+06:17:50.552 - [INFO] - Requested Piece Number : 10
+06:17:50.648 - [INFO] - PIECE : piece to set at - 10
+06:17:50.648 - [INFO] - PIECE : Self BitField before 29392
+06:17:50.649 - [INFO] - PIECE : Self BitField after 30416
+06:17:50.650 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 10 from 1001. Now the number of pieces it has is 8.
+
+06:17:50.651 - [INFO] - Requested Piece Number : 2
+06:17:50.697 - [INFO] - PIECE : piece to set at - 2
+06:17:50.697 - [INFO] - PIECE : Self BitField before 30416
+06:17:50.698 - [INFO] - PIECE : Self BitField after 30420
+06:17:50.698 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 2 from 1001. Now the number of pieces it has is 9.
+
+06:17:50.699 - [INFO] - Requested Piece Number : 0
+06:17:50.744 - [INFO] - PIECE : piece to set at - 0
+06:17:50.744 - [INFO] - PIECE : Self BitField before 30420
+06:17:50.745 - [INFO] - PIECE : Self BitField after 30421
+06:17:50.745 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 0 from 1001. Now the number of pieces it has is 10.
+
+06:17:50.746 - [INFO] - Requested Piece Number : 8
+06:17:50.815 - [INFO] - PIECE : piece to set at - 8
+06:17:50.815 - [INFO] - PIECE : Self BitField before 30421
+06:17:50.816 - [INFO] - PIECE : Self BitField after 30677
+06:17:50.816 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 8 from 1001. Now the number of pieces it has is 11.
+
+06:17:50.817 - [INFO] - Requested Piece Number : 11
+06:17:50.857 - [INFO] - PIECE : piece to set at - 11
+06:17:50.857 - [INFO] - PIECE : Self BitField before 30677
+06:17:50.858 - [INFO] - PIECE : Self BitField after 32725
+06:17:50.858 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 11 from 1001. Now the number of pieces it has is 12.
+
+06:17:50.859 - [INFO] - Requested Piece Number : 5
+06:17:50.917 - [INFO] - PIECE : piece to set at - 5
+06:17:50.917 - [INFO] - PIECE : Self BitField before 32725
+06:17:50.918 - [INFO] - PIECE : Self BitField after 32757
+06:17:50.918 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 5 from 1001. Now the number of pieces it has is 13.
+
+06:17:50.919 - [INFO] - Requested Piece Number : 3
+06:17:50.965 - [INFO] - PIECE : piece to set at - 3
+06:17:50.966 - [INFO] - PIECE : Self BitField before 32757
+06:17:50.967 - [INFO] - PIECE : Self BitField after 32765
+06:17:50.968 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 3 from 1001. Now the number of pieces it has is 14.
+
+06:17:50.969 - [INFO] - Requested Piece Number : 1
+06:17:51.027 - [INFO] - PIECE : piece to set at - 1
+06:17:51.028 - [INFO] - PIECE : Self BitField before 32765
+06:17:51.028 - [INFO] - PIECE : Self BitField after 32767
+06:17:51.028 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 1 from 1001. Now the number of pieces it has is 15.
+
+06:17:51.029 - [INFO] - Requested Piece Number : 15
+06:17:51.086 - [INFO] - PIECE : piece to set at - 15
+06:17:51.086 - [INFO] - PIECE : Self BitField before 32767
+06:17:51.087 - [INFO] - PIECE : Self BitField after 65535
+06:17:51.087 - [INFO] - Peer Peer@7ea987ac has downloaded the piece 15 from 1001. Now the number of pieces it has is 16.
+
+06:17:51.088 - [INFO] - DONE WITH EVERTYTHING

@@ -58,7 +58,6 @@ class Message {
             this.payload = payload;
         }
         else {
-        	System.out.println("Payload is null");
             this.payload = null;
         }
 
