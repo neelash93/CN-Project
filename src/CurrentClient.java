@@ -91,6 +91,23 @@ public class CurrentClient {
 		}
 
 		}
+//		catch (ConnectException e) {
+//            Log.addLog("Connection refused. You need to initiate a server first.");
+//        }
+//        //catch ( ClassNotFoundException e ) {
+//            //System.err.println("Class not found");
+//        //}
+//        catch(UnknownHostException unknownHost) {
+//            Log.addLog("You are trying to connect to an unknown host!");
+//        }
+//        catch(IOException ioException) {
+//            Log.addLog("IOException: See console for more details.");
+//            ioException.printStackTrace();
+//        }
+        //catch (InterruptedException e) {
+            //System.err.println("Interrupted thread execution.");
+        //}
+
         finally {
             //Close connections
         	comm1.closeConnections();
@@ -164,15 +181,15 @@ public class CurrentClient {
 			}else{
 				sendNotInterested(peerIndex);
 			}
-			l.log("Recieved Bitfield from peer "+allPeers.get(peerIndex).prop.peerId+". Bitfield is : "+allPeers.get(peerIndex).state.bitmap);
+			Log.addLog("Recieved Bitfield from peer "+allPeers.get(peerIndex).prop.peerId+". Bitfield is : "+allPeers.get(peerIndex).state.bitmap);
 		}
 		else if(msg.getType()==MessageType.INTERESTED){
 			allPeers.get(peerIndex).state.interested=true;
-			l.log("Recieved Interedted Message from peer "+allPeers.get(peerIndex).prop.peerId);
+			Log.addLog("Recieved Interedted Message from peer "+allPeers.get(peerIndex).prop.peerId);
 		}
 		else if(msg.getType()==MessageType.NOT_INTERESTED){
 			allPeers.get(peerIndex).state.interested=false;
-			l.log("Recieved UnInteredted Message from peer "+allPeers.get(peerIndex).prop.peerId);
+			Log.addLog("Recieved UnInteredted Message from peer "+allPeers.get(peerIndex).prop.peerId);
 
 		}
 		else if(msg.getType()==MessageType.HAVE){
@@ -208,40 +225,40 @@ public class CurrentClient {
 //			 for(Peer p : allPeers){
 //				 allFilesReceived = allFilesReceived & p.prop.hasFile;
 //			 }
-			 l.log("Have message recieved from peer "+allPeers.get(peerIndex).prop.peerId+". With piece index :"+bitIndex+"  //check "+thisIndex);
+			 Log.addLog("Have message recieved from peer "+allPeers.get(peerIndex).prop.peerId+". With piece index :"+bitIndex+"  //check "+thisIndex);
 			 BigInteger selfbits = new BigInteger(fileManager.bitField);
-			 l.log("Testing Self Bitfield inside Have message:"+selfbits);
+			 Log.addLog("Testing Self Bitfield inside Have message:"+selfbits);
 			 if(!selfbits.testBit(bitIndex)){
-				 l.log("HAVE : Need to set in self bitfield");
+				 Log.addLog("HAVE : Need to set in self bitfield");
 				 sendInterested(peerIndex);
 			 }
 
 		}
 		else if(msg.getType() == MessageType.PIECE){
 			//Update FileParts
-			l.log("PIECE : piece to set at - "+allPeers.get(peerIndex).state.pieceNumber);
+			Log.addLog("PIECE : piece to set at - "+allPeers.get(peerIndex).state.pieceNumber);
 			fileManager.fileParts[allPeers.get(peerIndex).state.pieceNumber] = msg.getPayload();
 			allPeers.get(peerIndex).state.isWaitingForPiece = false;
 			
 			BigInteger bitsSelf = new BigInteger(fileManager.bitField);
-			l.log("PIECE : Self BitField before "+ bitsSelf);
+			Log.addLog("PIECE : Self BitField before "+ bitsSelf);
 			
 			bitsSelf = bitsSelf.setBit(allPeers.get(peerIndex).state.pieceNumber);
-			l.log("PIECE : Self BitField after "+ bitsSelf);
+			Log.addLog("PIECE : Self BitField after "+ bitsSelf);
 			
 			allPeers.get(peerIndex).prop.partsRecieved += prop.pieceSize;
 			
 			fileManager.bitField = bitsSelf.toByteArray();
 			System.out.println("****Updated bitfield"+new BigInteger(fileManager.bitField));
 			
-			l.log("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.pieceNumber
+			Log.addLog("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.pieceNumber
             + " from " + allPeers.get(peerIndex).get_peerId() + ". Now the number of pieces it has is " + (++total) + "." + '\n');
 			//Update peerFileInfo
 			boolean peerGetsFile = checkHasFile(bitsSelf);
 			allPeers.get(prop.getOwnIndex()).prop.hasFile = peerGetsFile; //Could also do prop.hasFile = ... But could conflict if same prop object is not passed to CurrClient and allPeers.get(ownIndex)
 			prop.hasFile = peerGetsFile; //Just for debug purposes
 			if(peerGetsFile)
-				l.log("THIS CLIENT HAS RECIEVED THE FILE");
+				Log.addLog("THIS CLIENT HAS RECIEVED THE FILE");
 			
 			//Send have msg to others
 			for(Peer p : allPeers){
@@ -275,24 +292,24 @@ public class CurrentClient {
 //           sendFilePiece(messageIndex, pieceNumber);
             
 			int partIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();  //Alternative for above code;
-			l.log("REQUEST : Sending to peer "+allPeers.get(peerIndex).prop.peerId+", Piece number "+partIndex+"  //check "+pieceNumber);
+			Log.addLog("REQUEST : Sending to peer "+allPeers.get(peerIndex).prop.peerId+", Piece number "+partIndex+"  //check "+pieceNumber);
 			sendFileParts(peerIndex, partIndex);
             
 		}
 		else if(msg.getType() == MessageType.CHOKE){
 			allPeers.get(peerIndex).state.choked = true;
-            l.log("Peer " + allPeers.get(index).prop.peerId + " is choked by  " + allPeers.get(peerIndex).prop.peerId + '\n');
+            Log.addLog("Peer " + allPeers.get(index).prop.peerId + " is choked by  " + allPeers.get(peerIndex).prop.peerId + '\n');
 
 		}
 		else if(msg.getType() == MessageType.UNCHOKE){
 			allPeers.get(peerIndex).state.choked = false;
-            l.log("Peer " + allPeers.get(index).prop.peerId + " is unchoked by  " + allPeers.get(peerIndex).prop.peerId + '\n');
+            Log.addLog("Peer " + allPeers.get(index).prop.peerId + " is unchoked by  " + allPeers.get(peerIndex).prop.peerId + '\n');
 //			if(counter_test++ > ){
 //				assembleFilePieces();
 //				System.exit(0);
 //			}
 		}
-		else l.log("Illegal Message Type Found : " + msg.getType());
+		else Log.addLog("Illegal Message Type Found : " + msg.getType());
 		
 		processedMessages.add(msg);
 	}
@@ -304,7 +321,7 @@ public class CurrentClient {
 				if (!allPeers.get(i).state.hasHandshakeSent && allPeers.get(i).state.hasMadeConnection) {
 					sendHandShake(i, prop.peerId);
 					allPeers.get(i).state.hasHandshakeSent = true;
-					l.log(
+					Log.addLog(
 							"Peer " + prop.peerId + " is connected from Peer " + allPeers.get(i).prop.peerId + '\n');
 					// Logger
 				}
@@ -316,7 +333,7 @@ public class CurrentClient {
 				// Send the bitfield
 				sendBitfield(i);
 				allPeers.get(i).state.hasBitfieldSent = true;
-				l.log("Sent bitfield to host " + allPeers.get(i).prop.hostName + "on port "
+				Log.addLog("Sent bitfield to host " + allPeers.get(i).prop.hostName + "on port "
 						+ allPeers.get(i).prop.port + '\n');
 				// + " on port " + neighbors[i].portNumber + '\n');
 			}
@@ -328,7 +345,7 @@ public class CurrentClient {
 				System.out.println("Searching for random Piece");
 				allPeers.get(i).state.isWaitingForPiece = true;
 				int requestedPieceNumber = getRandomPiece(allPeers.get(i));
-				l.log("Requested Piece Number : "+requestedPieceNumber);
+				Log.addLog("Requested Piece Number : "+requestedPieceNumber);
 				allPeers.get(i).state.pieceNumber = requestedPieceNumber; //Change name to LatestRequestedPiece
 				
 				
@@ -534,7 +551,7 @@ public class CurrentClient {
 //	        	System.out.println(values[i]);
 //	        }
 //	        
-//	        l.log("Interesting Bits are : "+interestingBits);
+//	        Log.addLog("Interesting Bits are : "+interestingBits);
 //	        Random rng = new Random();
 //	        //Choose a random value from the available bits
 //	        if (exists) {
