@@ -7,8 +7,8 @@ import java.util.TimerTask;
 import java.util.Comparator;
 
 class PeerWithDownloadRate {
-	int peerId;
-	double downloadRate;
+	public int peerId;
+	public double downloadRate;
 
 	public PeerWithDownloadRate(int peerId, double downloadRate) {
 		super();
@@ -49,13 +49,13 @@ public class DeterminePreferredPeerTask extends TimerTask {
 		});	
 
 		for(int i=0; i < downloads.size(); i++) {
-			priorityQueue.add(new PeerWithDownloadRate(i, downloads.get(i)));
+			priorityQueue.add(new PeerWithDownloadRate(Integer.parseInt(client.allPeers.get(i).prop.peerId), downloads.get(i)));
 		}
 
 		// Store peers with top download rates from priority queue
 		List<Integer> topDownloadRatePeers = new ArrayList<>();
 		for(int i=0; i < client.prop.prefferedNeighbours; i++) {
-			topDownloadRatePeers.add(priorityQueue.remove().peerId);
+			topDownloadRatePeers.add(priorityQueue.poll().peerId);
 		}
 
 		String str = "";
