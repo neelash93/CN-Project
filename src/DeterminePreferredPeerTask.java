@@ -37,7 +37,7 @@ public class DeterminePreferredPeerTask extends TimerTask {
 		List<Peer> allPeers = this.client.allPeers; // to maintain list of all peers
 		List<Double> downloads = new ArrayList<>(); // to maintain download rates of all peers
 		for (Peer peer : allPeers) {
-			downloads.add(downloadSpeedCalc(peer));
+				downloads.add(downloadSpeedCalc(peer));
 		}
 
 		// Priority Queue with peer id, download rate
@@ -49,7 +49,8 @@ public class DeterminePreferredPeerTask extends TimerTask {
 		});	
 
 		for(int i=0; i < downloads.size(); i++) {
-			priorityQueue.add(new PeerWithDownloadRate(Integer.parseInt(client.allPeers.get(i).prop.peerId), downloads.get(i)));
+			if(i != this.client.index)
+				priorityQueue.add(new PeerWithDownloadRate(Integer.parseInt(client.allPeers.get(i).prop.peerId), downloads.get(i)));
 		}
 
 		// Store peers with top download rates from priority queue
@@ -60,7 +61,7 @@ public class DeterminePreferredPeerTask extends TimerTask {
 
 		String str = "";
 		for(int i=0; i < topDownloadRatePeers.size(); i++) {
-			str += client.prop.getIndex(topDownloadRatePeers.get(i)) +",";
+			str += topDownloadRatePeers.get(i) +",";
 		}
 		Log.addLog("Peer " + client.prop.peerId + " has the preferred neighbors " + str + "." + '\n');
 		

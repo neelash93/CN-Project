@@ -15,7 +15,7 @@ public class DetermineOptimisticPeerTask extends TimerTask {
 		int optimisticPeer = this.client.optimisticNeighbor;
 		this.client.optimisticNeighbor = this.determineOptimisticPeer();
 		if(optimisticPeer != this.client.optimisticNeighbor) {
-			Log.addLog("Peer " + this.client.prop.peerId + " has the optimistically unchoked neighbor " + this.client.optimisticNeighbor+ "." + '\n');
+			Log.addLog("Peer " + this.client.prop.peerId + " has the optimistically unchoked neighbor " + this.client.allPeers.get(this.client.optimisticNeighbor).prop.peerId+ "." + '\n');
 		}
 	}
 

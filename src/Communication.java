@@ -8,15 +8,13 @@ import java.util.List;
 
 public class Communication {
 	HashMap<Integer,Integer> connectionOrderMap;
-	Server server;
 	Socket requestConn[];           //Socket for all Peers
-    ObjectOutputStream out[];        //for outgoing COnnections
+    ObjectOutputStream out[];        //for outgoing Connections
     List<Peer> allPeers;
     Property prop;
-    static ServerListener1 serverListener;
+    static Server serverListener;
     
 	public Communication(Property prop, List<Peer> allPeers){
-//		server = new Server(prop);   //Listens for Connections
 		connectionOrderMap=new HashMap<>();
 		requestConn = new Socket[prop.indexMap.size()];
 		out = new ObjectOutputStream[prop.indexMap.size()];
@@ -25,7 +23,7 @@ public class Communication {
 	}
 	
 	public void startServer(int peerId, String hostName, int port){
-		serverListener = new ServerListener1(peerId, hostName, port);
+		serverListener = new Server(peerId, hostName, port);
 		
         int allConnections = 0;
             while (allConnections < allPeers.size() - 1) {
@@ -37,7 +35,7 @@ public class Communication {
                             " on port " + allPeers.get(i).prop.port);
 
                         try {
-                            //create a socket to connect to the server
+                            //create a socket to connect to all other Peers
                             requestConn[i] = new Socket(allPeers.get(i).prop.hostName, allPeers.get(i).prop.port);
 
                             if (requestConn[i].isConnected()) {
@@ -95,6 +93,6 @@ public class Communication {
 	}
 
 	public List<Message> getRecievedMessages(){
-		return serverListener.receivedMessages;
+		return serverListener.messagesFromPeers;
 	}
 }

@@ -126,12 +126,12 @@ public class CurrentClient {
 		} 
 		else if(msg.getType() == MessageType.INTERESTED) {
 			allPeers.get(peerIndex).state.interested=true;
-			Log.addLog("Peer "+" recieved the interested message from peer "+allPeers.get(peerIndex).prop.peerId+ "." + '\n');
+			Log.addLog("Peer " +prop.peerId+ " recieved the interested message from peer "+allPeers.get(peerIndex).prop.peerId+ "." + '\n');
 		} 
 		else if(msg.getType() == MessageType.NOT_INTERESTED) {
 			allPeers.get(peerIndex).state.interested=false;
 			Log.addLog("Peer "+ prop.peerId+ " recieved the 'not interested' message from peer "+allPeers.get(peerIndex).prop.peerId+ "." + '\n');
-		} 
+		}
 		else if(msg.getType() == MessageType.HAVE){
 			int bitIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();
 			
@@ -166,14 +166,14 @@ public class CurrentClient {
 
 			fileManager.bitField = bitsSelf.toByteArray();
 
-			Log.addLog("Peer " + allPeers.get(prop.getOwnIndex()) + " has downloaded the piece " + allPeers.get(peerIndex).state.lastRequestedPart
+			Log.addLog("Peer " + prop.peerId + " has downloaded the piece " + allPeers.get(peerIndex).state.lastRequestedPart
 					+ " from " + allPeers.get(peerIndex).get_peerId() + ". Now the number of pieces it has is " + (++allParts) + "." + '\n');
 
 			//Update peerFileInfo
 			boolean peerGetsFile = checkHasFile(bitsSelf);
 			allPeers.get(prop.getOwnIndex()).prop.hasFile = peerGetsFile; 
 			
-			if(peerGetsFile && !prop.hasFile) 
+			if(peerGetsFile) 
 			    Log.addLog("Peer " + prop.peerId + " has downloaded the complete file." + '\n');
 
 			prop.hasFile = peerGetsFile;
