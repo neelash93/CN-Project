@@ -343,12 +343,12 @@ public class CurrentClient {
 		incomingbits.andNot(selfbits);
 
 		// converting incomingbits bitset to long value
-		long value = 0L;
+		long val = 0L;
 		for (int i = 0; i < incomingbits.length(); ++i) {
-			value += incomingbits.get(i) ? (1L << i) : 0L;
+			val += incomingbits.get(i) ? (1L << i) : 0L;
 		}
 
-		if (value > 0) {
+		if (val > 0) {
 			return true;
 		}
 

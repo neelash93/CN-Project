@@ -16,7 +16,6 @@ public class Communication {
     static ServerListener1 serverListener;
     
 	public Communication(Property prop, List<Peer> allPeers){
-//		server = new Server(prop);   //Listens for Connections
 		connectionOrderMap=new HashMap<>();
 		requestConn = new Socket[prop.indexMap.size()];
 		out = new ObjectOutputStream[prop.indexMap.size()];
@@ -48,13 +47,11 @@ public class Communication {
                             }
                         } catch (Exception e) {
                             allPeers.get(i).state.hasConnectionRefused = true;
-//                            System.out.println(e);
                         }
                     }
                 }
           
                 if (allConnections < allPeers.size() - 1) {
-                	//Wait before attempting to reconnect
                     try {
                     Thread.sleep(1500);
                     } catch (Exception e) {
