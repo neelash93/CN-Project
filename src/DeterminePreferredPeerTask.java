@@ -60,7 +60,7 @@ public class DeterminePreferredPeerTask extends TimerTask {
 
 		String str = "";
 		for(int i=0; i < topDownloadRatePeers.size(); i++) {
-			str += client.prop.getIndex(topDownloadRatePeers.get(i)) +",";
+			str += client.prop.getIndex(topDownloadRatePeers.get(i)) +", ";
 		}
 		Log.addLog("Peer " + client.prop.peerId + " has the preferred neighbors " + str + "." + '\n');
 		
