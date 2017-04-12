@@ -1,8 +1,3 @@
-/**
- * Created by Prateek on 2/19/2017.
- */
-
-
 import java.nio.ByteBuffer;
 
 
@@ -88,7 +83,6 @@ class Message {
         messageBuffer.put(messageLength);
         messageBuffer.put((byte)type.getValue());
 
-//        if (payload != null) {
         if(hasPayload(type)){
             messageBuffer.put(payload);
         }
@@ -126,9 +120,7 @@ public class MessageBuilder {
     }
 
     public byte[] createBitfield(byte[] bitfield) {
-        //create bitfield message and send it to peers
         Message message = new Message(bitfield.length, MessageType.BITFIELD, bitfield);
-        //System.out.println("sending bitfield: " + bitfield.toString());
         return message.getMessageBytes();
 
     }
@@ -150,29 +142,24 @@ public class MessageBuilder {
     }
 
     public byte[] createFilePiece(int pieceSize,byte filePieces[][] ,int pieceNumber) {
-        //Send file piece to a given server
         Message message = new Message(pieceSize, MessageType.PIECE, filePieces[pieceNumber]);
         return message.getMessageBytes();
     }
 
     public byte[] createChoke(int index) {
-        //Send a choke message to non-preferred peers
         Message message = new Message(0,MessageType.CHOKE, null);
         return message.getMessageBytes();
     }
 
     public byte[] createUnchoke(int index) {
-        //Send a choke message to non-preferred peers
         Message message = new Message(0,MessageType.UNCHOKE, null);
         return message.getMessageBytes();
     }
 
     public byte[] createRequest(int index, int pieceNumber) {
-        //send a request message to a given inde
         byte[] pieceIndex = ByteBuffer.allocate(4).putInt(pieceNumber).array();
         Message message = new Message(4,MessageType.REQUEST,pieceIndex);
 
-        //logger.info("Sending request " + pieceNumber + " to server " + index + '\n');
         return message.getMessageBytes();
 
     }
