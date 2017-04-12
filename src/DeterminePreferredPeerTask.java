@@ -79,11 +79,13 @@ public class DeterminePreferredPeerTask extends TimerTask {
 			if (i != this.client.index) {
 				// if this peer exists then unchoke it
 				if (exists) { 
-					this.client.sendUnchoke(i); 
+//					this.client.sendUnchoke(i); 
+					this.client.sendMessage(MessageType.UNCHOKE, i);
 					exists = false;
 				} else {
 					// choke the peer id it does not exist
-					this.client.sendChoke(i); 
+//					this.client.sendChoke(i); 
+					this.client.sendMessage(MessageType.CHOKE, i);
 				}
 			}
 		}

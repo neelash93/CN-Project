@@ -24,14 +24,14 @@ public class CurrentClient {
 	List<Peer> allPeers;
 	List<Integer> preferredPeers;
 	int allParts = 0;
-	
+
 	Property prop;
 	public static Communication comm;
 	public FileManager fileManager;
 	public MessageBuilder messageBuilder;
 	Log log;
 	Scheduler scheduler;
-	
+
 	public CurrentClient(int index, ArrayList<Peer> peers) {
 		this.allPeers = peers;
 		this.index = index;
@@ -42,7 +42,7 @@ public class CurrentClient {
 		scheduler = new Scheduler();
 		preferredPeers = new ArrayList<>(prop.prefferedNeighbours);
 		messageBuilder = new MessageBuilder();
-		
+
 		process();
 	}
 
@@ -54,7 +54,7 @@ public class CurrentClient {
 			while (!allFilesReceived) {
 				// setup connection
 				setUpConnections();
-				
+
 				//setup scheduler
 				if (!firstTime) {
 					DeterminePreferredPeerTask determinePreferredPeerTask = new DeterminePreferredPeerTask(this);
@@ -62,10 +62,10 @@ public class CurrentClient {
 
 					DetermineOptimisticPeerTask determineOptimisticPeerTask = new DetermineOptimisticPeerTask(this);
 					scheduler.schedule(determineOptimisticPeerTask, prop.optUnchokingInterval);
-					
+
 					firstTime = true;
 				}
-				
+
 				processReceivedMessages();
 			}
 		}
@@ -73,7 +73,7 @@ public class CurrentClient {
 		finally {
 			comm.closeConnections(); // to close all connections
 		}
-		
+
 		writeFile();
 		System.exit(0);
 	}
@@ -82,16 +82,16 @@ public class CurrentClient {
 		int peerIndex = -1;
 		List<Message> recievedMessages = comm.getRecievedMessages();
 		List <Message> processedMessages =new ArrayList<Message>();
-		
+
 		synchronized(recievedMessages) {
 			for(Message msg : recievedMessages) {
 				peerIndex=comm.connectionOrderMap.getOrDefault(msg.getClientId(),-1);
-				
+
 				if(msg.getType()!=MessageType.HANDSHAKE){
 					if(peerIndex == -1) continue;
 					peerIndex = prop.getIndex(peerIndex);
 				}
-				
+
 				if(peerIndex!=-1 ) {
 					if(msg.getType()!=MessageType.BITFIELD && !allPeers.get(peerIndex).state.hasBitfieldReceived && allPeers.get(peerIndex).state.hasHandshakeReceived) {
 						continue;
@@ -113,46 +113,46 @@ public class CurrentClient {
 			comm.connectionOrderMap.put(msg.getClientId(),msg.getLength());
 			peerIndex=prop.getIndex(msg.getLength());
 			allPeers.get(peerIndex).state.hasHandshakeReceived=true;
-		} 
+		}
 		else if(msg.getType() == MessageType.BITFIELD) {
 			allPeers.get(peerIndex).state.bitField=msg.getPayload();
 
 			allPeers.get(peerIndex).state.hasBitfieldReceived=true;
 			if(ifFilePartsNeeded(allPeers.get(peerIndex))) {
-				sendInterested(peerIndex);
+				sendMessage(MessageType.INTERESTED,peerIndex);
 			} else {
-				sendNotInterested(peerIndex);
+				sendMessage(MessageType.NOT_INTERESTED,peerIndex);
 			}
-		} 
+		}
 		else if(msg.getType() == MessageType.INTERESTED) {
 			allPeers.get(peerIndex).state.interested=true;
-			Log.addLog("Peer " +prop.peerId+ " recieved the interested message from peer "+allPeers.get(peerIndex).prop.peerId+ "." + '\n');
-		} 
+			Log.addLog("Peer "+prop.peerId+" recieved the interested message from peer "+allPeers.get(peerIndex).prop.peerId+ "." + '\n');
+		}
 		else if(msg.getType() == MessageType.NOT_INTERESTED) {
 			allPeers.get(peerIndex).state.interested=false;
 			Log.addLog("Peer "+ prop.peerId+ " recieved the 'not interested' message from peer "+allPeers.get(peerIndex).prop.peerId+ "." + '\n');
 		}
 		else if(msg.getType() == MessageType.HAVE){
 			int bitIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();
-			
+
 			BigInteger bits = new BigInteger(allPeers.get(peerIndex).state.bitField);
 			bits = bits.setBit(bitIndex);
 			allPeers.get(peerIndex).state.bitField = bits.toByteArray();
 
-			boolean peerGetsFile = checkHasFile(bits); 
-		
+			boolean peerGetsFile = checkHasFile(bits);
+
 			//update allPeers
 			allPeers.get(peerIndex).prop.hasFile = peerGetsFile;
 
 			//check if all peers received the file
 			allFilesReceived = checkAllReceived();
-			
+
 			Log.addLog("Peer "+ prop.peerId+" received the 'have' message from peer "+allPeers.get(peerIndex).prop.peerId+" for the piece :"+bitIndex+ "." + '\n');
 			BigInteger selfbits = new BigInteger(fileManager.bitField);
 			if(!selfbits.testBit(bitIndex)) {
-				sendInterested(peerIndex);
+				sendMessage(MessageType.INTERESTED,peerIndex);
 			}
-		} 
+		}
 		else if(msg.getType() == MessageType.PIECE) {
 			//Update File Parts
 			fileManager.fileParts[allPeers.get(peerIndex).state.lastRequestedPart] = msg.getPayload();
@@ -171,18 +171,18 @@ public class CurrentClient {
 
 			//Update peerFileInfo
 			boolean peerGetsFile = checkHasFile(bitsSelf);
-			allPeers.get(prop.getOwnIndex()).prop.hasFile = peerGetsFile; 
-			
-			if(peerGetsFile) 
+			allPeers.get(prop.getOwnIndex()).prop.hasFile = peerGetsFile;
+
+			if(peerGetsFile)
 			    Log.addLog("Peer " + prop.peerId + " has downloaded the complete file." + '\n');
 
 			prop.hasFile = peerGetsFile;
-			
+
 			//Send have message to others
 			for(Peer p : allPeers){
 				int i = p.prop.getOwnIndex();
 				if(i != index) // or prop.getOwnIndex()
-					sendHave(i,allPeers.get(peerIndex).state.lastRequestedPart);
+					sendMessage(allPeers.get(peerIndex).state.lastRequestedPart,MessageType.HAVE,i);
 			}
 
 			allPeers.get(peerIndex).state.lastRequestedPart = -1;
@@ -196,7 +196,7 @@ public class CurrentClient {
 					hasInterest = ifFilePartsNeeded(allPeers.get(i));
 				}
 				if(hasInterest == false)
-					sendNotInterested(i);
+					sendMessage(MessageType.NOT_INTERESTED,i);
 			}
 
 			allFilesReceived = checkAllReceived();
@@ -205,8 +205,8 @@ public class CurrentClient {
 			ByteBuffer buffer = ByteBuffer.wrap(msg.getPayload());
 			int pieceNumber = buffer.getInt();
 
-			int partIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue(); 
-			sendFileParts(peerIndex, partIndex);
+			int partIndex = new BigInteger(Arrays.copyOfRange(msg.getPayload(), 0, 4)).intValue();
+			sendMessage(partIndex,MessageType.PIECE,peerIndex);
 
 		}
 		else if(msg.getType() == MessageType.CHOKE){
@@ -229,14 +229,14 @@ public class CurrentClient {
 		for (int i = 0; i < allPeers.size(); i++) {
 			if (i != index) {
 				if (!allPeers.get(i).state.hasHandshakeSent && allPeers.get(i).state.hasMadeConnection) {
-					sendHandShake(i, prop.peerId);
+					sendMessage(prop.peerId,MessageType.HANDSHAKE,i);
 					allPeers.get(i).state.hasHandshakeSent = true;
 					Log.addLog("Peer " + prop.peerId + " is connected from Peer " + allPeers.get(i).prop.peerId+ "." + '\n');
 				}
 
 				if (!allPeers.get(i).state.hasBitfieldSent && allPeers.get(i).state.hasMadeConnection
 						&& allPeers.get(i).state.hasHandshakeReceived) {
-					sendBitfield(i);
+					sendMessage(MessageType.BITFIELD,i);
 					allPeers.get(i).state.hasBitfieldSent = true;
 				}
 
@@ -248,8 +248,7 @@ public class CurrentClient {
 					allPeers.get(i).state.lastRequestedPart = latestRequestedPiece; //Change name to LatestRequestedPiece
 
 					if (latestRequestedPiece != -1 && latestRequestedPiece < prop.numberOfPieces) {
-						sendRequest(i, latestRequestedPiece);
-					}
+						sendMessage(latestRequestedPiece,MessageType.REQUEST,i);					}
 				}
 			}
 		}
@@ -264,53 +263,7 @@ public class CurrentClient {
 			e.printStackTrace();
 		}
 	}
-	
-	private void sendRequest(int index, int pieceNumber) {
-		byte[] pieceMessage = messageBuilder.createRequest(index, pieceNumber);
-		sendMessage(pieceMessage, index);
-	}
 
-	private void sendBitfield(int index) {
-		byte[] bitfieldMessage = messageBuilder.createBitfield(fileManager.bitField);
-		sendMessage(bitfieldMessage, index);
-	}
-
-	public void sendHandShake(int index, String peerId) {
-		byte[] handshake = messageBuilder.createHandshake(Integer.parseInt(peerId));
-		sendMessage(handshake, index);
-		Log.addLog("Peer " + peerId + " makes a connection to Peer " + allPeers.get(index).prop.peerId+ "." + '\n');
-	}
-
-	public void sendUnchoke(int index) {
-		byte[] message = messageBuilder.createUnchoke(index);
-		sendMessage(message, index);
-	}
-
-	public void sendChoke(int index) {
-		byte[] message = messageBuilder.createChoke(index);
-		sendMessage(message, index);
-	}
-
-	public void sendInterested(int index){
-		byte[] message = messageBuilder.createInterested(index);
-		sendMessage(message, index);
-
-	}
-
-	public void sendFileParts(int index,int partNumber){
-		byte[] message = messageBuilder.createFilePiece(prop.pieceSize,fileManager.fileParts,partNumber);
-		sendMessage(message, index);
-	}
-
-	public void sendNotInterested(int index){
-		byte[] message = messageBuilder.createNotInterested(index);
-		sendMessage(message, index);
-	}
-
-	public void sendHave(int index, int pieceNumber) {
-		byte[] message = messageBuilder.createHave(index, pieceNumber);
-		sendMessage(message, index);
-	}
 
 	public void writeFile()  {
 		try {
@@ -338,17 +291,17 @@ public class CurrentClient {
 				selfbits.set(i);
 			}
 		}
-		
-		// to get the interesting incoming set bits 
+
+		// to get the interesting incoming set bits
 		incomingbits.andNot(selfbits);
 
 		// converting incomingbits bitset to long value
-		long val = 0L;
+		long value = 0L;
 		for (int i = 0; i < incomingbits.length(); ++i) {
-			val += incomingbits.get(i) ? (1L << i) : 0L;
+			value += incomingbits.get(i) ? (1L << i) : 0L;
 		}
 
-		if (val > 0) {
+		if (value > 0) {
 			return true;
 		}
 
@@ -373,7 +326,7 @@ public class CurrentClient {
 
 		// to get the interesting incoming set bits
 		incomingbits.andNot(selfbits);
-		
+
 		int j = 0;
 		boolean exists = false;
 		int[] val = new int[incomingbits.length()];
@@ -410,4 +363,66 @@ public class CurrentClient {
 		}
 		return result;
 	}
+	public void sendMessage(int number,MessageType type, int socketIndex) {
+		byte[] msg=null;
+		if(type==MessageType.REQUEST){
+			msg  = messageBuilder.createRequest(index, number);
+		}else if(type==MessageType.PIECE){
+			msg = messageBuilder.createFilePiece(prop.pieceSize,fileManager.fileParts,number);
+		}else if(type==MessageType.HAVE){
+			msg=messageBuilder.createHave(index, number);
+		}else
+			return ;
+		try {
+			comm.out[socketIndex].writeObject(msg);
+			comm.out[socketIndex].flush();
+		} catch(IOException e){
+			System.err.println("Sending message failed");
+			e.printStackTrace();
+		}
+	}
+
+
+	public void sendMessage(MessageType type, int socketIndex) {
+		byte[] msg=null;
+		if(type==MessageType.BITFIELD){
+			msg  = messageBuilder.createBitfield(fileManager.bitField);
+		}else if(type==MessageType.UNCHOKE){
+			msg = messageBuilder.createUnchoke(index);
+		}else if(type==MessageType.CHOKE){
+			msg=messageBuilder.createChoke(index);
+		}else if(type==MessageType.INTERESTED){
+			msg=messageBuilder.createInterested(index);
+		}else if(type==MessageType.NOT_INTERESTED){
+			msg=messageBuilder.createNotInterested(index);
+		}else return;
+
+		try {
+			comm.out[socketIndex].writeObject(msg);
+			comm.out[socketIndex].flush();
+		} catch(IOException e){
+			System.err.println("Sending message failed");
+			e.printStackTrace();
+		}
+	}
+
+	public void sendMessage(String peerId,MessageType type, int socketIndex) {
+		byte[] msg=null;
+		if(type==MessageType.HANDSHAKE){
+		msg=messageBuilder.createHandshake(Integer.parseInt(peerId));
+		}else
+			return ;
+		try {
+			comm.out[socketIndex].writeObject(msg);
+			comm.out[socketIndex].flush();
+		} catch(IOException e){
+			System.err.println("Sending message failed");
+			e.printStackTrace();
+		}
+	}
+
+
+
+
+
 }

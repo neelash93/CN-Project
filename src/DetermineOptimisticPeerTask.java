@@ -35,7 +35,8 @@ public class DetermineOptimisticPeerTask extends TimerTask {
 		int randomPeer = 0;
 		if (values.size() > 0) {
 			randomPeer = values.get((int) (Math.random() * values.size()));
-			this.client.sendUnchoke(randomPeer);
+//			this.client.sendUnchoke(randomPeer);
+			this.client.sendMessage(MessageType.UNCHOKE, randomPeer);
 		}		
 		
 		return randomPeer;
